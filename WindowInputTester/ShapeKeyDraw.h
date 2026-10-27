@@ -9,6 +9,10 @@ enum EKeyShape
 	KS_Triangle,
 	KS_Square,
 	KS_Cross,
+	KS_Up,		//Chevrons, for the cursor keys.
+	KS_Down,
+	KS_Left,
+	KS_Right,
 };
 
 

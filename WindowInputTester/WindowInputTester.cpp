@@ -200,9 +200,11 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pKeyboard = OMalloc<CKeyboard>();
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
 
-			//The keyboard and the mouse's buttons read the devices as they are drawn.  The wheel's rolls are only events, which
-			//go from the focussed component up to the main container, which shows them on the mouse and passes them on.
+			//The keyboard and the mouse's buttons read the devices as they are drawn.  The wheel's rolls and the mouse's
+			//movement are only events, which go from the focussed component (the one under the pointer for movement) up to
+			//the main container, which shows them on the mouse and passes them on.
 			pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pMouse, &CMouse::KeyAction);
+			pMain->AddInputAction(IAF_Movement, NULL, &pMouse, &CMouse::MovementAction);
 			pWindow->GetColourFormat(&cFormat);
 			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateKeyboard(JEWEL_ICON, &cFormat));
 			cFileMenuListener.Init(pWindow, &sDialogLook, pFontColours, pTabbed, pFileMenu);

@@ -16,7 +16,8 @@
 // legends, a key with two legends has its lower one.  The icon keys above
 // the navigation keys are named for their icons and are the keys a PC
 // keyboard has there; the four above the number pad are drawn as their
-// shapes and, like fn, no device has them.
+// shapes and, like fn, no device has them.  The cursor keys are drawn as
+// chevrons.
 //
 //////////////////////////////////////////////////////////////////////////
 void CKeyboard::Init(void)
@@ -34,8 +35,6 @@ void CKeyboard::Init(void)
 	const char*	aszNavigationTopNames[] = { "Insert", "Home", "Page Up" };
 	const char*	aszNavigationBottom[] = { "del", "end", "pgdn", NULL };
 	const char*	aszNavigationBottomNames[] = { "Delete", "End", "Page Down" };
-	const char*	aszArrows[] = { "left", "down", "right", NULL };
-	const char*	aszArrowNames[] = { "Cursor Left", "Cursor Down", "Cursor Right" };
 	const char*	aszPadTop[] = { "clear", "/", "*", "-", NULL };
 	const char*	aszPadTopNames[] = { "Num Lock", "Numpad /", "Numpad *", "Numpad -" };
 	const char*	aszPad7[] = { "7", "8", "9", NULL };
@@ -63,10 +62,10 @@ void CKeyboard::Init(void)
 	AddRow(6.5f, 0, aszF5, NULL);
 	AddRow(11, 0, aszF9, NULL);
 	AddRow(fNavigation, 0, aszIcons, aszIconNames);
-	AddKey(fPad, 0, KS_Circle);
-	AddKey(fPad + 1, 0, KS_Triangle);
-	AddKey(fPad + 2, 0, KS_Square);
-	AddKey(fPad + 3, 0, KS_Cross);
+	AddKey(fPad, 0, KS_Circle, NULL);
+	AddKey(fPad + 1, 0, KS_Triangle, NULL);
+	AddKey(fPad + 2, 0, KS_Square, NULL);
+	AddKey(fPad + 3, 0, KS_Cross, NULL);
 
 	y = 1 + KEYBOARD_GAP;
 	x = AddRow(0, y, aszNumbers, NULL);
@@ -92,7 +91,7 @@ void CKeyboard::Init(void)
 	AddKey(0, y, 2.25f, 1, "shift", "Left Shift");
 	x = AddRow(2.25f, y, aszBottom, NULL);
 	AddKey(x, y, 2.75f, 1, "shift", "Right Shift");
-	AddKey(fNavigation + 1, y, 1, 1, "up", "Cursor Up");
+	AddKey(fNavigation + 1, y, KS_Up, "Cursor Up");
 	x = AddRow(fPad, y, aszPad1, aszPad1Names);
 	AddKey(x, y, 1, 2, "enter", "Numpad Enter");
 
@@ -105,7 +104,9 @@ void CKeyboard::Init(void)
 	AddKey(11.25f, y, 1.25f, 1, "option", "Right Special");
 	AddKey(12.5f, y, 1.25f, 1, "fn", NULL);
 	AddKey(13.75f, y, 1.25f, 1, "ctrl", "Right Control");
-	AddRow(fNavigation, y, aszArrows, aszArrowNames);
+	AddKey(fNavigation, y, KS_Left, "Cursor Left");
+	AddKey(fNavigation + 1, y, KS_Down, "Cursor Down");
+	AddKey(fNavigation + 2, y, KS_Right, "Cursor Right");
 	AddKey(fPad, y, 2, 1, "0", "Numpad 0");
 	AddKey(fPad + 2, y, 1, 1, ".", "Numpad .");
 
@@ -166,12 +167,12 @@ void CKeyboard::AddKey(float32 x, float32 y, float32 fWidth, float32 fHeight, co
 
 //////////////////////////////////////////////////////////////////////////
 //
-// A one unit key with a shape for its legend.
+// A one unit key with a shape for its legend.  szInputName can be NULL.
 //
 //////////////////////////////////////////////////////////////////////////
-void CKeyboard::AddKey(float32 x, float32 y, EKeyShape eShape)
+void CKeyboard::AddKey(float32 x, float32 y, EKeyShape eShape, const char* szInputName)
 {
-	maKeys.Add(OMalloc<CKey>(x, y, 1.0f, 1.0f, OMalloc<CShapeKeyDraw>(eShape), (const char*)NULL));
+	maKeys.Add(OMalloc<CKey>(x, y, 1.0f, 1.0f, OMalloc<CShapeKeyDraw>(eShape), szInputName));
 }
 
 

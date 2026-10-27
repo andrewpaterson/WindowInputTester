@@ -1,3 +1,4 @@
+#include <math.h>
 #include "BaseLib/StringHelper.h"
 #include "BaseLib/Timer.h"
 #include "StandardLib/ClassDefines.h"
@@ -5,6 +6,7 @@
 
 
 #define MOUSE_ROLLED_MILLISECONDS	300  //How long the wheel counts as rolled after a roll.
+#define MOUSE_MOTION_MILLISECONDS	80.0  //How quickly the velocity follows the movement; it falls to a third this long after the mouse stops.
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -20,6 +22,11 @@ void CMouse::Init(void)
 	mbWheel = false;
 	miRolledUp = 0;
 	miRolledDown = 0;
+	miMovedRight = 0;
+	miMovedDown = 0;
+	mfVelocityRight = 0;
+	mfVelocityDown = 0;
+	miMotionTime = 0;
 
 	PostInit();
 }
@@ -36,6 +43,11 @@ void CMouse::Class(void)
 	U_Bool(mbWheel);
 	U_Int64(miRolledUp);
 	U_Int64(miRolledDown);
+	U_Int32(miMovedRight);
+	U_Int32(miMovedDown);
+	U_Float64(mfVelocityRight);
+	U_Float64(mfVelocityDown);
+	U_Int64(miMotionTime);
 }
 
 
@@ -108,7 +120,57 @@ void CMouse::KeyAction(SComponentInputEvent* psEvent)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Buttons let go of while another window has focus are never heard.
+// The input action for movement.  The event is passed on so the pointer
+// still moves over the components.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouse::MovementAction(SComponentInputEvent* psEvent)
+{
+	psEvent->bPass = true;
+	miMovedRight += psEvent->iRight;
+	miMovedDown += psEvent->iDown;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The movement since the last call, over the time since it, is blended
+// into the velocity; the longer the time the more it counts.  iNow is in
+// milliseconds, as GetDebugTickCount.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouse::UpdateMotion(int64 iNow)
+{
+	float64	fElapsed;
+	float64	fKeep;
+
+	if (miMotionTime == 0)
+	{
+		miMotionTime = iNow;
+		miMovedRight = 0;
+		miMovedDown = 0;
+		return;
+	}
+
+	fElapsed = (float64)(iNow - miMotionTime);
+	if (fElapsed <= 0)
+	{
+		return;
+	}
+
+	fKeep = exp(-fElapsed / MOUSE_MOTION_MILLISECONDS);
+	mfVelocityRight = mfVelocityRight * fKeep + (miMovedRight * 1000.0 / fElapsed) * (1 - fKeep);
+	mfVelocityDown = mfVelocityDown * fKeep + (miMovedDown * 1000.0 / fElapsed) * (1 - fKeep);
+	miMovedRight = 0;
+	miMovedDown = 0;
+	miMotionTime = iNow;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Buttons let go of while another window has focus are never heard, and
+// it hears no movement.
 //
 //////////////////////////////////////////////////////////////////////////
 void CMouse::ReleaseAll(void)
@@ -116,6 +178,11 @@ void CMouse::ReleaseAll(void)
 	mbLeft = false;
 	mbRight = false;
 	mbWheel = false;
+	miMovedRight = 0;
+	miMovedDown = 0;
+	mfVelocityRight = 0;
+	mfVelocityDown = 0;
+	miMotionTime = 0;
 }
 
 
@@ -152,4 +219,12 @@ int32 CMouse::GetState(int64 iNow)
 	}
 	return iState;
 }
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+float64 CMouse::GetVelocityRight(void) { return mfVelocityRight; }
+float64 CMouse::GetVelocityDown(void) { return mfVelocityDown; }
 

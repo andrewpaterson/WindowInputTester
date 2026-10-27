@@ -40,7 +40,7 @@ public:
 
 protected:
 	void			AddKey(float32 x, float32 y, float32 fWidth, float32 fHeight, const char* szText, const char* szInputName);
-	void			AddKey(float32 x, float32 y, EKeyShape eShape);
+	void			AddKey(float32 x, float32 y, EKeyShape eShape, const char* szInputName);
 	float32			AddRow(float32 x, float32 y, const char** aszTexts, const char** aszInputNames);
 };
 

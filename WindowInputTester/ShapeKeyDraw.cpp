@@ -46,7 +46,8 @@ void CShapeKeyDraw::Free(void)
 //////////////////////////////////////////////////////////////////////////
 //
 // The lines are inside the shape's size.  The triangle points up with its
-// middle height on the face's middle.
+// middle height on the face's middle.  A chevron is the shape's size
+// across and half of it deep, centred on the face's middle.
 //
 //////////////////////////////////////////////////////////////////////////
 void CShapeKeyDraw::Draw(CImageDraw* pcDraw, CKeyboardCanvasDraw* pcKeyboardDraw, float64 fLeft, float64 fTop, float64 fRight, float64 fBottom)
@@ -85,6 +86,22 @@ void CShapeKeyDraw::Draw(CImageDraw* pcDraw, CKeyboardCanvasDraw* pcKeyboardDraw
 	case KS_Cross:
 		pcDraw->DrawStroke(x - fHalf, y - fHalf, x + fHalf, y + fHalf, SHAPE_KEY_LINE);
 		pcDraw->DrawStroke(x + fHalf, y - fHalf, x - fHalf, y + fHalf, SHAPE_KEY_LINE);
+		break;
+	case KS_Up:
+		pcDraw->DrawStroke(x - fHalf, y + fHalf / 2, x, y - fHalf / 2, SHAPE_KEY_LINE);
+		pcDraw->DrawStroke(x, y - fHalf / 2, x + fHalf, y + fHalf / 2, SHAPE_KEY_LINE);
+		break;
+	case KS_Down:
+		pcDraw->DrawStroke(x - fHalf, y - fHalf / 2, x, y + fHalf / 2, SHAPE_KEY_LINE);
+		pcDraw->DrawStroke(x, y + fHalf / 2, x + fHalf, y - fHalf / 2, SHAPE_KEY_LINE);
+		break;
+	case KS_Left:
+		pcDraw->DrawStroke(x + fHalf / 2, y - fHalf, x - fHalf / 2, y, SHAPE_KEY_LINE);
+		pcDraw->DrawStroke(x - fHalf / 2, y, x + fHalf / 2, y + fHalf, SHAPE_KEY_LINE);
+		break;
+	case KS_Right:
+		pcDraw->DrawStroke(x - fHalf / 2, y - fHalf, x + fHalf / 2, y, SHAPE_KEY_LINE);
+		pcDraw->DrawStroke(x + fHalf / 2, y, x - fHalf / 2, y + fHalf, SHAPE_KEY_LINE);
 		break;
 	}
 }

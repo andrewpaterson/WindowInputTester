@@ -1,3 +1,4 @@
+#include <math.h>
 #include "BaseLib/Timer.h"
 #include "StandardLib/ClassDefines.h"
 #include "StandardLib/Objects.h"
@@ -21,6 +22,14 @@
 #define MOUSE_ARROW_WIDTH		0.5		//As a part of the wheel's width.
 #define MOUSE_ARROW_HEIGHT		0.55	//As a part of the arrow's width.
 #define MOUSE_ARROW_CENTRE		0.27	//From the wheel's top to the up arrow's centre, and from its bottom to the down arrow's, as a part of the wheel's height.
+#define MOUSE_MOTION_CENTRE		0.42	//From the buttons to the motion arrow's start, as a part of the body below the buttons.
+#define MOUSE_MOTION_STILL		40.0	//Counts a second; slower than this the mouse is still and there is no arrow.
+#define MOUSE_MOTION_MINIMUM	12.0	//Pixels long, the arrow of a mouse only just moving.
+#define MOUSE_MOTION_SCALE		0.03	//Pixels more arrow for each count a second the mouse moves.
+#define MOUSE_MOTION_GAP		8.0		//Pixels kept clear between the longest arrow and the body's edge.
+#define MOUSE_MOTION_HEAD		0.12	//The longest head, as a part of the width; a head is at most half its arrow.
+#define MOUSE_MOTION_HEAD_WIDTH	0.75	//Half the head's width, as a part of its length.
+#define MOUSE_MOTION_SHAFT		0.4		//Half the shaft's width, as a part of half the head's.
 #define MOUSE_BACKGROUND		JEWEL_EDITOR
 #define MOUSE_BORDER			JEWEL_BORDER
 #define MOUSE_FACE				JEWEL_PANEL
@@ -53,6 +62,7 @@ void CMouseCanvasDraw::Init(Ptr<CMouse> pMouse)
 	mpMouse = pMouse;
 	msCelSize.Init(-1, -1);
 	miCelState = 0;
+	msCelArrow.Init(0, 0);
 
 	PostInit();
 }
@@ -69,6 +79,7 @@ void CMouseCanvasDraw::Class(void)
 	M_Pointer(mpMouse);
 	U_2Int32(msCelSize);
 	U_Int32(miCelState);
+	U_2Int32(msCelArrow);
 }
 
 
@@ -111,6 +122,8 @@ bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	SInt32Vec2			sSize;
 	int32				iState;
 	CComponentInput*	pcInput;
+	int64				iNow;
+	SInt32Vec2			sArrow;
 
 	sSize = pCanvas->GetActualSize();
 	if ((sSize.x <= 0) || (sSize.y <= 0))
@@ -128,10 +141,13 @@ bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 		mpMouse->Update(pcInput);
 	}
 
-	iState = mpMouse->GetState(GetDebugTickCount());
-	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || (iState != miCelState) || mpCelDraw->GetCel().IsNull())
+	iNow = GetDebugTickCount();
+	mpMouse->UpdateMotion(iNow);
+	iState = mpMouse->GetState(iNow);
+	sArrow = GetArrow(sSize);
+	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || (iState != miCelState) || (sArrow.x != msCelArrow.x) || (sArrow.y != msCelArrow.y) || mpCelDraw->GetCel().IsNull())
 	{
-		MakeCel(pCanvas, sSize, iState);
+		MakeCel(pCanvas, sSize, iState, sArrow);
 	}
 	return mpCelDraw->Draw(pCanvas);
 }
@@ -143,10 +159,10 @@ bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 // canvas's colour order.  Each part is its border colour with its face
 // colour a pixel inside it.  The straight edges are on whole pixels so
 // that only the curves are blended.  iState is the mouse's MOUSE_PRESSED_
-// and MOUSE_ROLLED_ flags.
+// and MOUSE_ROLLED_ flags, sArrow the motion arrow (see GetArrow).
 //
 //////////////////////////////////////////////////////////////////////////
-void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iState)
+void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iState, SInt32Vec2 sArrow)
 {
 	Ptr<CImage>			pImage;
 	CImageDraw			cDraw;
@@ -175,14 +191,9 @@ void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iSt
 	float64				fWheelRadius;
 	float64				fArrowWidth;
 	bool				bWheel;
-
-	fHeight = sSize.y - 2 * MOUSE_MARGIN;
-	fWidth = fHeight * MOUSE_ASPECT;
-	if (fWidth > sSize.x - 2 * MOUSE_MARGIN)
-	{
-		fWidth = sSize.x - 2 * MOUSE_MARGIN;
-		fHeight = fWidth / MOUSE_ASPECT;
-	}
+	float64				fMotionX;
+	float64				fMotionY;
+	float64				fMaxLength;
 
 	pImage = OMalloc<CImage>(sSize.x, sSize.y, PT_uint8, IMAGE_DIFFUSE_RED, IMAGE_DIFFUSE_GREEN, IMAGE_DIFFUSE_BLUE, IMAGE_OPACITY, CHANNEL_STOP);
 	pImage->Black();
@@ -199,12 +210,8 @@ void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iSt
 	cDraw.SetColour(&cBackground);
 	cDraw.DrawRectangle(0, 0, sSize.x, sSize.y);
 
-	if ((fWidth > 16) && (fHeight > 16))
+	if (GetBody(sSize, &fLeft, &fTop, &fRight, &fBottom))
 	{
-		fLeft = (int32)((sSize.x - fWidth) / 2);
-		fTop = (int32)((sSize.y - fHeight) / 2);
-		fRight = (int32)(fLeft + fWidth);
-		fBottom = (int32)(fTop + fHeight);
 		fWidth = fRight - fLeft;
 		fHeight = fBottom - fTop;
 		fTopRadius = fWidth * MOUSE_TOP_RADIUS;
@@ -249,6 +256,12 @@ void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iSt
 		DrawArrow(&cDraw, fCentre + 0.5, fWheelTop + (fWheelBottom - fWheelTop) * MOUSE_ARROW_CENTRE, fArrowWidth, true);
 		cDraw.SetColour((iState & MOUSE_ROLLED_DOWN) ? &cRolledArrow : &cArrow);
 		DrawArrow(&cDraw, fCentre + 0.5, fWheelBottom - (fWheelBottom - fWheelTop) * MOUSE_ARROW_CENTRE, fArrowWidth, false);
+
+		if ((sArrow.x != 0) || (sArrow.y != 0))
+		{
+			GetMotionArea(fLeft, fTop, fRight, fBottom, &fMotionX, &fMotionY, &fMaxLength);
+			DrawMotion(&cDraw, fMotionX, fMotionY, sArrow, fWidth, &cPressedBorder, &cPressedFace);
+		}
 	}
 
 	cDraw.Kill();
@@ -264,6 +277,7 @@ void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iSt
 	mpCelDraw->SetCel(OMalloc<CImageCel>(pImage));
 	msCelSize = sSize;
 	miCelState = iState;
+	msCelArrow = sArrow;
 }
 
 
@@ -365,5 +379,190 @@ void CMouseCanvasDraw::DrawArrow(CImageDraw* pcDraw, float64 fCentreX, float64 f
 	asPoints[1].Init(fCentreX + fWidth / 2, fBase);
 	asPoints[2].Init(fCentreX - fWidth / 2, fBase);
 	pcDraw->DrawPolygon(asPoints, 3);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The body's edges in a canvas sSize big, on whole pixels.  Returns false
+// if the canvas is too small to draw a mouse in.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CMouseCanvasDraw::GetBody(SInt32Vec2 sSize, float64* pfLeft, float64* pfTop, float64* pfRight, float64* pfBottom)
+{
+	float64	fWidth;
+	float64	fHeight;
+
+	fHeight = sSize.y - 2 * MOUSE_MARGIN;
+	fWidth = fHeight * MOUSE_ASPECT;
+	if (fWidth > sSize.x - 2 * MOUSE_MARGIN)
+	{
+		fWidth = sSize.x - 2 * MOUSE_MARGIN;
+		fHeight = fWidth / MOUSE_ASPECT;
+	}
+	if ((fWidth <= 16) || (fHeight <= 16))
+	{
+		return false;
+	}
+
+	*pfLeft = (int32)((sSize.x - fWidth) / 2);
+	*pfTop = (int32)((sSize.y - fHeight) / 2);
+	*pfRight = (int32)(*pfLeft + fWidth);
+	*pfBottom = (int32)(*pfTop + fHeight);
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Where the motion arrow starts, below the buttons, and how long it can
+// be and still be inside the body pointing any way.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouseCanvasDraw::GetMotionArea(float64 fLeft, float64 fTop, float64 fRight, float64 fBottom, float64* pfCentreX, float64* pfCentreY, float64* pfMaxLength)
+{
+	float64	fButtons;
+	float64	fBelow;
+
+	fButtons = (int32)(fTop + (fBottom - fTop) * MOUSE_BUTTONS_HEIGHT);
+	fBelow = fBottom - fButtons;
+	*pfCentreX = (int32)((fLeft + fRight) / 2) + 0.5;
+	*pfCentreY = fButtons + fBelow * MOUSE_MOTION_CENTRE;
+	*pfMaxLength = fBelow * MOUSE_MOTION_CENTRE;
+	if ((fRight - fLeft) / 2 < *pfMaxLength)
+	{
+		*pfMaxLength = (fRight - fLeft) / 2;
+	}
+	*pfMaxLength -= MOUSE_MOTION_GAP;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The motion arrow for the mouse's velocity in whole pixels right and
+// down: the way it moves, a short arrow longer by the speed, no longer
+// than there is room for, and 0, 0 if it is still or there is no mouse.
+//
+//////////////////////////////////////////////////////////////////////////
+SInt32Vec2 CMouseCanvasDraw::GetArrow(SInt32Vec2 sSize)
+{
+	SInt32Vec2	sArrow;
+	float64		fLeft;
+	float64		fTop;
+	float64		fRight;
+	float64		fBottom;
+	float64		fCentreX;
+	float64		fCentreY;
+	float64		fMaxLength;
+	float64		x;
+	float64		y;
+	float64		fSpeed;
+	float64		fLength;
+
+	sArrow.Init(0, 0);
+	if (!GetBody(sSize, &fLeft, &fTop, &fRight, &fBottom))
+	{
+		return sArrow;
+	}
+	GetMotionArea(fLeft, fTop, fRight, fBottom, &fCentreX, &fCentreY, &fMaxLength);
+
+	x = mpMouse->GetVelocityRight();
+	y = mpMouse->GetVelocityDown();
+	fSpeed = sqrt(x * x + y * y);
+	if ((fSpeed < MOUSE_MOTION_STILL) || (fMaxLength < MOUSE_MOTION_MINIMUM))
+	{
+		return sArrow;
+	}
+
+	fLength = MOUSE_MOTION_MINIMUM + (fSpeed - MOUSE_MOTION_STILL) * MOUSE_MOTION_SCALE;
+	if (fLength > fMaxLength)
+	{
+		fLength = fMaxLength;
+	}
+	sArrow.Init((int32)floor(x * fLength / fSpeed + 0.5), (int32)floor(y * fLength / fSpeed + 0.5));
+	return sArrow;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// An arrow from the point to sArrow pixels away, drawn as a pressed key
+// is: the border colour with the face colour a pixel inside it.  fWidth is
+// the body's, which limits the head.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouseCanvasDraw::DrawMotion(CImageDraw* pcDraw, float64 fCentreX, float64 fCentreY, SInt32Vec2 sArrow, float64 fWidth, CImageColourARGB* pcBorder, CImageColourARGB* pcFace)
+{
+	SFloat64Vec2	asOuter[7];
+	SFloat64Vec2	asInner[7];
+	float64			afU[7];
+	float64			afW[7];
+	float64			fLength;
+	float64			fDirectionX;
+	float64			fDirectionY;
+	float64			fHead;
+	float64			fHalfHead;
+	float64			fHalfShaft;
+	float64			fBase;
+	float64			fTipInset;
+	float64			fInnerHalfHead;
+	int				i;
+
+	fLength = sqrt((float64)sArrow.x * sArrow.x + (float64)sArrow.y * sArrow.y);
+	fDirectionX = sArrow.x / fLength;
+	fDirectionY = sArrow.y / fLength;
+
+	fHead = fLength / 2;
+	if (fHead > fWidth * MOUSE_MOTION_HEAD)
+	{
+		fHead = fWidth * MOUSE_MOTION_HEAD;
+	}
+	fHalfHead = fHead * MOUSE_MOTION_HEAD_WIDTH;
+	fHalfShaft = fHalfHead * MOUSE_MOTION_SHAFT;
+	if (fHalfShaft < 2.5)
+	{
+		fHalfShaft = 2.5;
+	}
+	if (fHalfHead < fHalfShaft + 1.5)
+	{
+		fHalfHead = fHalfShaft + 1.5;
+	}
+	fBase = fLength - fHead;
+
+	//Along the arrow (u) and across it (w).  The inside is a pixel in from every edge; the head's sides move in by a
+	//pixel square to them, so its tip moves back more.
+	afU[0] = 0;			afW[0] = -fHalfShaft;
+	afU[1] = fBase;		afW[1] = -fHalfShaft;
+	afU[2] = fBase;		afW[2] = -fHalfHead;
+	afU[3] = fLength;	afW[3] = 0;
+	afU[4] = fBase;		afW[4] = fHalfHead;
+	afU[5] = fBase;		afW[5] = fHalfShaft;
+	afU[6] = 0;			afW[6] = fHalfShaft;
+	for (i = 0; i < 7; i++)
+	{
+		asOuter[i].Init(fCentreX + afU[i] * fDirectionX - afW[i] * fDirectionY, fCentreY + afU[i] * fDirectionY + afW[i] * fDirectionX);
+	}
+
+	fTipInset = sqrt(fHead * fHead + fHalfHead * fHalfHead) / fHalfHead;
+	fInnerHalfHead = (fHead - fTipInset - 1) * fHalfHead / fHead;
+	afU[0] = 1;						afW[0] = -(fHalfShaft - 1);
+	afU[1] = fBase + 1;				afW[1] = -(fHalfShaft - 1);
+	afU[2] = fBase + 1;				afW[2] = -fInnerHalfHead;
+	afU[3] = fLength - fTipInset;	afW[3] = 0;
+	afU[4] = fBase + 1;				afW[4] = fInnerHalfHead;
+	afU[5] = fBase + 1;				afW[5] = fHalfShaft - 1;
+	afU[6] = 1;						afW[6] = fHalfShaft - 1;
+	for (i = 0; i < 7; i++)
+	{
+		asInner[i].Init(fCentreX + afU[i] * fDirectionX - afW[i] * fDirectionY, fCentreY + afU[i] * fDirectionY + afW[i] * fDirectionX);
+	}
+
+	pcDraw->SetColour(pcBorder);
+	pcDraw->DrawPolygon(asOuter, 7);
+	if (fInnerHalfHead > fHalfShaft - 1)
+	{
+		pcDraw->SetColour(pcFace);
+		pcDraw->DrawPolygon(asInner, 7);
+	}
 }
 
