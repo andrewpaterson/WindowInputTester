@@ -20,20 +20,22 @@
 #include "WindowLib/ComponentInput.h"
 #include "WindowLib/JewelTheme.h"
 #include "WindowLib/TabbedContainer.h"
-#include "WindowLib/FillContainer.h"
-#include "WindowLib/ScrollPane.h"
-#include "WindowLib/TextArea.h"
 #include "WindowLib/JewelButtonImages.h"
 #include "WindowLib/MenuBar.h"
-#include "WindowLib/MenuListener.h"
+#include "WindowLib/Dialog.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterTick.h"
-#include "TabNameDialog.h"
+#include "TabNameListener.h"
+#include "FileMenuListener.h"
 #include "Keyboard.h"
 #include "KeyboardCanvasDraw.h"
 
 
+#define WINDOW_INPUT_TESTER_EDITOR_TEXT	"The quick brown fox jumps over the lazy dog.\n" \
+										"\n" \
+										"Type here.  Arrows, Home and End, Page Up and Down move the caret; with Shift they select.\n" \
+										"Tab indents, Shift+Tab outdents, Control+D duplicates and Control+X, C and V use the clipboard."
 #define WINDOW_INPUT_TESTER_FONT_CHARACTERS	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
 
 
@@ -50,97 +52,6 @@ Ptr<CCanvas> CreateCanvas(Ptr<CWindow> pWindow, Ptr<CCanvasDraw> pDraw)
 	pCanvas->SetAlignment(CSH_Stretch, CSV_Stretch);
 	return pCanvas;
 }
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-// An editable text area in a scroll pane over the editor's colour.
-//
-//////////////////////////////////////////////////////////////////////////
-Ptr<CFillContainer> CreateEditor(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFontColours> pFontColours)
-{
-	Ptr<CFillContainer>		pEditor;
-	Ptr<CScrollPane>		pScroll;
-	Ptr<CTextArea>			pTextArea;
-
-	pTextArea = OMalloc<CTextArea>(pWindow, pFontColours,
-		"The quick brown fox jumps over the lazy dog.\n"
-		"\n"
-		"Type here.  Arrows, Home and End, Page Up and Down move the caret; with Shift they select.\n"
-		"Tab indents, Shift+Tab outdents, Control+D duplicates and Control+X, C and V use the clipboard.");
-	pTextArea->SetColour(JEWEL_TEXT);
-	pTextArea->SetMarkColours(pTheme->GetTextSelectionColour(), pTheme->GetCaretColour());
-	pTextArea->SetWordWrap(true);
-	pTextArea->SetAlignment(CSH_Stretch, CSV_Stretch);
-
-	pScroll = OMalloc<CScrollPane>(pWindow, pTheme);
-	pScroll->SetAlignment(CSH_Stretch, CSV_Stretch);
-	pScroll->SetPolicy(SBO_Horizontal, SPP_Never);
-	pScroll->SetContent(pTextArea);
-
-	pEditor = OMalloc<CFillContainer>(pWindow);
-	pEditor->SetAlignment(CSH_Stretch, CSV_Stretch);
-	pEditor->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)));
-	pEditor->AddComponent(pScroll);
-	return pEditor;
-}
-
-
-//The File menu's New Editor Tab asks for a name with a CTabNameDialog and adds a closable editor tab with it, which
-//is selected.  Cancel, or an empty name, adds nothing.
-class CNewEditorTabListener : public CMenuListener
-{
-CONSTRUCTABLE(CNewEditorTabListener);
-protected:
-	Ptr<CWindow>			mpWindow;
-	Ptr<CWindowTheme>		mpTheme;
-	Ptr<CFontColours>		mpFontColours;
-	Ptr<CTabbedContainer>	mpTabbed;
-	Ptr<CMenuItem>			mpNewEditorTab;
-	int						miNextEditor;  //The number in the next tab's suggested name.
-
-public:
-	void Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFontColours> pFontColours, Ptr<CTabbedContainer> pTabbed, Ptr<CMenuItem> pNewEditorTab)
-	{
-		mpWindow = pWindow;
-		mpTheme = pTheme;
-		mpFontColours = pFontColours;
-		mpTabbed = pTabbed;
-		mpNewEditorTab = pNewEditorTab;
-		miNextEditor = 2;
-	}
-
-	void Kill(void)
-	{
-		mpNewEditorTab = NULL;
-		mpTabbed = NULL;
-		mpFontColours = NULL;
-		mpTheme = NULL;
-		mpWindow = NULL;
-	}
-
-	void MenuItemClicked(CUnknown* pcSource, void* pvContext) override
-	{
-		CTabNameDialog	cDialog;
-		CChars			szName;
-
-		if (&mpNewEditorTab != pcSource)
-		{
-			return;
-		}
-
-		szName.Init("Editor ");
-		szName.Append(miNextEditor);
-		cDialog.Init(mpWindow, mpTheme, JEWEL_PANEL, "New Editor Tab", szName.Text());
-		if (cDialog.Show() && (cDialog.GetName()[0] != '\0'))
-		{
-			mpTabbed->Select(mpTabbed->AddTab(cDialog.GetName(), CreateEditor(mpWindow, mpTheme, mpFontColours), NULL, true));
-			miNextEditor++;
-		}
-		cDialog.Kill();
-		szName.Kill();
-	}
-};
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -220,7 +131,9 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Ptr<CGridContainer>				pMain;
 		Ptr<CMenuBar>					pMenuBar;
 		Ptr<CMenuContainer>				pFileMenu;
-		CNewEditorTabListener			cNewEditorTabListener;
+		CFileMenuListener				cFileMenuListener;
+		SDialogLook						sDialogLook;
+		SWindowInputTesterDialogs		sDialogs;
 		Ptr<CWindowTheme>				pTheme;
 		Ptr<CTabbedContainer>			pTabbed;
 		Ptr<CTabComponent>				pInputTab;
@@ -244,7 +157,9 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		//The window is in the root so that changing pointers into its components doesn't make the objects work out again which
 		//of them are still on the stack.  Its tick is allocated, not on the stack, because stack objects can't be under the root.
-		pTick = OMalloc<CWindowInputTesterTick>();
+		sDialogs.pcFileMenu = NULL;
+		sDialogs.pcTabNames = NULL;
+		pTick = OMalloc<CWindowInputTesterTick>(&sDialogs);
 		pWindow = OMalloc<CWindow>("Window Input Tester", &cNativeFactory, pTick, OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 		ORoot()->Add(pWindow);
 
@@ -254,6 +169,10 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		{
 			pFontColours = OMalloc<CFontColours>(pWhite);
 			pTheme = CJewelTheme::CreateDarkTheme(pWindow, pFontColours->GetFont(JEWEL_TEXT));
+			sDialogLook.pTheme = pTheme;
+			sDialogLook.pDimFont = pFontColours->GetFont(JEWEL_ICON);
+			sDialogLook.sBackground = JEWEL_PANEL;
+			sDialogLook.sDivider = JEWEL_SEPARATOR;
 			pTabbed = OMalloc<CTabbedContainer>(pWindow, pTheme);
 			pTabbed->SetAlignment(CSH_Stretch, CSV_Stretch);
 
@@ -275,14 +194,15 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(OMalloc<CKeyboard>(), pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
 			pWindow->GetColourFormat(&cFormat);
 			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateKeyboard(JEWEL_ICON, &cFormat));
-			pTabbed->AddTab("Editor", CreateEditor(pWindow, pTheme, pFontColours), NULL, true);
+			cFileMenuListener.Init(pWindow, &sDialogLook, pFontColours, pTabbed, pFileMenu);
+			pMenuBar->AddListener(&cFileMenuListener);
+			cFileMenuListener.AddEditorTab("Editor", WINDOW_INPUT_TESTER_EDITOR_TEXT);
 
 			//Double clicking a tab other than Input renames it.
-			cTabNameListener.Init(pWindow, pTheme, pInputTab);
+			cTabNameListener.Init(pWindow, &sDialogLook, pInputTab);
 			pTabbed->AddListener(&cTabNameListener);
-
-			cNewEditorTabListener.Init(pWindow, pTheme, pFontColours, pTabbed, pFileMenu->AddItem("New Editor Tab..."));
-			pMenuBar->AddListener(&cNewEditorTabListener);
+			sDialogs.pcFileMenu = &cFileMenuListener;
+			sDialogs.pcTabNames = &cTabNameListener;
 
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
@@ -300,10 +220,13 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pWindow->SetWindowSize(1280, 800);
 			pWindow->Show();
 
+			sDialogs.pcFileMenu = NULL;
+			sDialogs.pcTabNames = NULL;
 			pTabbed->RemoveListener(&cTabNameListener);
 			cTabNameListener.Kill();
-			pMenuBar->RemoveListener(&cNewEditorTabListener);
-			cNewEditorTabListener.Kill();
+			pMenuBar->RemoveListener(&cFileMenuListener);
+			cFileMenuListener.Kill();
+			sDialogLook.Kill();
 
 			pWindow->SetComponentInput(NULL);
 			cNativeFactory.SetRawInput(NULL, NULL);

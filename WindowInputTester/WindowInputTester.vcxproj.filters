@@ -7,7 +7,13 @@
     <ClCompile Include="WindowInputTesterTick.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="TabNameDialog.cpp">
+    <ClCompile Include="TabNameListener.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="FileMenuListener.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorPage.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="Key.cpp">
@@ -33,7 +39,13 @@
     <ClInclude Include="WindowInputTesterTick.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="TabNameDialog.h">
+    <ClInclude Include="TabNameListener.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="FileMenuListener.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="EditorPage.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Key.h">
