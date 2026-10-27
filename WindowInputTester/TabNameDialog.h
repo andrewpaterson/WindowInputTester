@@ -20,9 +20,9 @@ public:
 };
 
 
-//A Name label and a text field holding a tab's name in a window of its own, shown modally over the tester's window
-//in IntelliJ's style with OK and Cancel along the bottom on the right.  OK is the default button, enter clicks it;
-//escape clicks Cancel.  The dialog's window is in the root while the dialog exists.
+//A Name label and a text field holding a tab's name in a window of its own titled szTitle, shown modally over the
+//tester's window in IntelliJ's style with OK and Cancel along the bottom on the right.  OK is the default button, enter
+//clicks it; escape clicks Cancel.  The dialog's window is in the root while the dialog exists.
 class CTabNameDialog : public CButtonListener
 {
 CONSTRUCTABLE(CTabNameDialog);
@@ -36,7 +36,7 @@ protected:
 	bool				mbOK;
 
 public:
-	void	Init(Ptr<CWindow> pOwner, Ptr<CWindowTheme> pTheme, ARGB32 sBackground, const char* szName);
+	void	Init(Ptr<CWindow> pOwner, Ptr<CWindowTheme> pTheme, ARGB32 sBackground, const char* szTitle, const char* szName);
 	void	Kill(void);
 
 	bool	Show(void);
@@ -46,7 +46,8 @@ public:
 };
 
 
-//Double clicking a tab other than the Input tab asks for its new name with a CTabNameDialog.  OK renames it.
+//Double clicking a tab other than the Input tab asks for its new name with a CTabNameDialog.  OK renames it unless
+//the name is empty.
 class CTabNameListener : public CTabbedContainerListener
 {
 CONSTRUCTABLE(CTabNameListener);

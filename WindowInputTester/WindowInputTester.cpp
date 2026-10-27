@@ -24,6 +24,8 @@
 #include "WindowLib/ScrollPane.h"
 #include "WindowLib/TextArea.h"
 #include "WindowLib/JewelButtonImages.h"
+#include "WindowLib/MenuBar.h"
+#include "WindowLib/MenuListener.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterTick.h"
@@ -82,6 +84,63 @@ Ptr<CFillContainer> CreateEditor(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme,
 	pEditor->AddComponent(pScroll);
 	return pEditor;
 }
+
+
+//The File menu's New Editor Tab asks for a name with a CTabNameDialog and adds a closable editor tab with it, which
+//is selected.  Cancel, or an empty name, adds nothing.
+class CNewEditorTabListener : public CMenuListener
+{
+CONSTRUCTABLE(CNewEditorTabListener);
+protected:
+	Ptr<CWindow>			mpWindow;
+	Ptr<CWindowTheme>		mpTheme;
+	Ptr<CFontColours>		mpFontColours;
+	Ptr<CTabbedContainer>	mpTabbed;
+	Ptr<CMenuItem>			mpNewEditorTab;
+	int						miNextEditor;  //The number in the next tab's suggested name.
+
+public:
+	void Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFontColours> pFontColours, Ptr<CTabbedContainer> pTabbed, Ptr<CMenuItem> pNewEditorTab)
+	{
+		mpWindow = pWindow;
+		mpTheme = pTheme;
+		mpFontColours = pFontColours;
+		mpTabbed = pTabbed;
+		mpNewEditorTab = pNewEditorTab;
+		miNextEditor = 2;
+	}
+
+	void Kill(void)
+	{
+		mpNewEditorTab = NULL;
+		mpTabbed = NULL;
+		mpFontColours = NULL;
+		mpTheme = NULL;
+		mpWindow = NULL;
+	}
+
+	void MenuItemClicked(CUnknown* pcSource, void* pvContext) override
+	{
+		CTabNameDialog	cDialog;
+		CChars			szName;
+
+		if (&mpNewEditorTab != pcSource)
+		{
+			return;
+		}
+
+		szName.Init("Editor ");
+		szName.Append(miNextEditor);
+		cDialog.Init(mpWindow, mpTheme, JEWEL_PANEL, "New Editor Tab", szName.Text());
+		if (cDialog.Show() && (cDialog.GetName()[0] != '\0'))
+		{
+			mpTabbed->Select(mpTabbed->AddTab(cDialog.GetName(), CreateEditor(mpWindow, mpTheme, mpFontColours), NULL, true));
+			miNextEditor++;
+		}
+		cDialog.Kill();
+		szName.Kill();
+	}
+};
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -158,6 +217,10 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Ptr<CWindow>					pWindow;
 		Ptr<CWindowInputTesterTick>		pTick;
 		Ptr<CGridContainer>				pGrid;
+		Ptr<CGridContainer>				pMain;
+		Ptr<CMenuBar>					pMenuBar;
+		Ptr<CMenuContainer>				pFileMenu;
+		CNewEditorTabListener			cNewEditorTabListener;
 		Ptr<CWindowTheme>				pTheme;
 		Ptr<CTabbedContainer>			pTabbed;
 		Ptr<CTabComponent>				pInputTab;
@@ -192,7 +255,17 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pFontColours = OMalloc<CFontColours>(pWhite);
 			pTheme = CJewelTheme::CreateDarkTheme(pWindow, pFontColours->GetFont(JEWEL_TEXT));
 			pTabbed = OMalloc<CTabbedContainer>(pWindow, pTheme);
-			pWindow->SetContainer(pTabbed);
+			pTabbed->SetAlignment(CSH_Stretch, CSV_Stretch);
+
+			//The menu bar along the top over the tabs.
+			pMenuBar = OMalloc<CMenuBar>(pWindow, pTheme);
+			pMenuBar->SetAlignment(CSH_Stretch, CSV_Stretch);
+			pFileMenu = OMalloc<CMenuContainer>(pWindow, pTheme);
+			pMenuBar->AddMenu("File", pFileMenu);
+			pMain = OMalloc<CGridContainer>(pWindow);
+			pMain->AddComponent(pMenuBar, 0, 0, 1, 1, 1, 0);
+			pMain->AddComponent(pTabbed, 0, 1, 1, 1, 1, 1);
+			pWindow->SetContainer(pMain);
 
 			//Two cells on top, each half the width, over one cell spanning both columns.  The rows are each half the height.
 			pGrid = OMalloc<CGridContainer>(pWindow);
@@ -207,6 +280,9 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			//Double clicking a tab other than Input renames it.
 			cTabNameListener.Init(pWindow, pTheme, pInputTab);
 			pTabbed->AddListener(&cTabNameListener);
+
+			cNewEditorTabListener.Init(pWindow, pTheme, pFontColours, pTabbed, pFileMenu->AddItem("New Editor Tab..."));
+			pMenuBar->AddListener(&cNewEditorTabListener);
 
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
@@ -226,6 +302,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 			pTabbed->RemoveListener(&cTabNameListener);
 			cTabNameListener.Kill();
+			pMenuBar->RemoveListener(&cNewEditorTabListener);
+			cNewEditorTabListener.Kill();
 
 			pWindow->SetComponentInput(NULL);
 			cNativeFactory.SetRawInput(NULL, NULL);
@@ -240,6 +318,9 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 
 		pGrid = NULL;
+		pFileMenu = NULL;
+		pMenuBar = NULL;
+		pMain = NULL;
 		pInputTab = NULL;
 		pTabbed = NULL;
 		pTheme = NULL;

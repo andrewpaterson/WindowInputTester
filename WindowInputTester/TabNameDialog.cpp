@@ -43,7 +43,7 @@ void CTabNameDialogTick::Tick(Ptr<CWindow> pWindow, int64 iUpdateTimeInMilliecon
 // replaces it.
 //
 //////////////////////////////////////////////////////////////////////////
-void CTabNameDialog::Init(Ptr<CWindow> pOwner, Ptr<CWindowTheme> pTheme, ARGB32 sBackground, const char* szName)
+void CTabNameDialog::Init(Ptr<CWindow> pOwner, Ptr<CWindowTheme> pTheme, ARGB32 sBackground, const char* szTitle, const char* szName)
 {
 	Ptr<CFillContainer>		pFill;
 	Ptr<CGridContainer>		pGrid;
@@ -56,7 +56,7 @@ void CTabNameDialog::Init(Ptr<CWindow> pOwner, Ptr<CWindowTheme> pTheme, ARGB32 
 	mpOwner = pOwner;
 	mbOK = false;
 
-	mpDialog = OMalloc<CWindow>("Rename Tab", pOwner->GetFactory(), OMalloc<CTabNameDialogTick>(), OMalloc<CClearCanvasDraw>(sBackground), pOwner->GetColourFormat(), pOwner->GetColourOrder(), pOwner->GetColourBits(), pOwner->GetAlphaBits());
+	mpDialog = OMalloc<CWindow>(szTitle, pOwner->GetFactory(), OMalloc<CTabNameDialogTick>(), OMalloc<CClearCanvasDraw>(sBackground), pOwner->GetColourFormat(), pOwner->GetColourOrder(), pOwner->GetColourBits(), pOwner->GetAlphaBits());
 	ORoot()->Add(mpDialog);
 
 	pFill = OMalloc<CFillContainer>(mpDialog);
@@ -201,8 +201,8 @@ void CTabNameListener::TabDoubleClicked(CUnknown* pcSource, void* pvContext)
 	}
 
 	pcTab = (CTabComponent*)pcSource;
-	cDialog.Init(mpOwner, mpTheme, JEWEL_PANEL, pcTab->GetText());
-	if (cDialog.Show())
+	cDialog.Init(mpOwner, mpTheme, JEWEL_PANEL, "Rename Tab", pcTab->GetText());
+	if (cDialog.Show() && (cDialog.GetName()[0] != '\0'))
 	{
 		pcTab->SetText(cDialog.GetName());
 	}
