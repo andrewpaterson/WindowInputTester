@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="WindowInputTester.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowInputTesterTick.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Key.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Keyboard.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyboardCanvasDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="KeyDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="TextKeyDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ShapeKeyDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="WindowInputTesterTick.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Key.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Keyboard.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyboardCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="KeyDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TextKeyDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="ShapeKeyDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{5A0C7E2B-3D41-4F8A-9B6E-1C2D3E4F5A6B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

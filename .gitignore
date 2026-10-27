@@ -1,0 +1,10 @@
+/Debug/*
+/Release/*
+/.vs/*
+/WindowInputTester/Debug/*
+/WindowInputTester/Release/*
+/WindowInputTester/x64/Debug/*
+/WindowInputTester/x64/Release/*
+/x64/Debug/*
+/x64/Release/*
+/WindowInputTester/Output/*
