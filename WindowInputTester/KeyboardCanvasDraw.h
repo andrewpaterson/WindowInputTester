@@ -1,6 +1,7 @@
 #ifndef __KEYBOARD_CANVAS_DRAW_H__
 #define __KEYBOARD_CANVAS_DRAW_H__
 #include "SupportLib/ColourARGB32.h"
+#include "SupportLib/Int32Rect.h"
 #include "SupportLib/Font.h"
 #include "SupportLib/TextLayout.h"
 #include "SupportLib/GlyphListFontDraw.h"
@@ -36,7 +37,7 @@ public:
 	bool		Load(CObjectReader* pcFile) override;
 
 	bool		Draw(Ptr<CCanvas> pCanvas) override;
-	void		DrawText(CImageDraw* pcDraw, const char* szText, int32 iCentreX, int32 iCentreY);
+	void		DrawText(CImageDraw* pcDraw, const char* szText, int32 iCentreX, int32 iCentreY, CInt32Rect* pcClip);
 
 protected:
 	void		MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize);

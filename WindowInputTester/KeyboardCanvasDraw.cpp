@@ -233,9 +233,11 @@ void CKeyboardCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize)
 
 //////////////////////////////////////////////////////////////////////////
 //
+// The text centred on the point, its glyphs cut off outside pcClip so a
+// legend too wide for its key doesn't spill over the key's border.
 //
 //////////////////////////////////////////////////////////////////////////
-void CKeyboardCanvasDraw::DrawText(CImageDraw* pcDraw, const char* szText, int32 iCentreX, int32 iCentreY)
+void CKeyboardCanvasDraw::DrawText(CImageDraw* pcDraw, const char* szText, int32 iCentreX, int32 iCentreY, CInt32Rect* pcClip)
 {
 	CSimpleTextReader		cReader;
 	CUTF8					cUTF8;
@@ -276,6 +278,6 @@ void CKeyboardCanvasDraw::DrawText(CImageDraw* pcDraw, const char* szText, int32
 	for (i = 0; i < uiNumGlyphs; i++)
 	{
 		psGlyph = pasGlyphs->Get(i);
-		pcDraw->DrawCel(x + psGlyph->sPosition.x, y + psGlyph->sPosition.y, psGlyph->pcGlyph->GetCel());
+		pcDraw->DrawCel(x + psGlyph->sPosition.x, y + psGlyph->sPosition.y, psGlyph->pcGlyph->GetCel(), pcClip);
 	}
 }

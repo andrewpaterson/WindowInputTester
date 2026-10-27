@@ -42,11 +42,16 @@ void CTextKeyDraw::Free(void)
 
 //////////////////////////////////////////////////////////////////////////
 //
+// The text is clipped to the face, the key's graphic inset by its one
+// pixel border.
 //
 //////////////////////////////////////////////////////////////////////////
 void CTextKeyDraw::Draw(CImageDraw* pcDraw, CKeyboardCanvasDraw* pcKeyboardDraw, float64 fLeft, float64 fTop, float64 fRight, float64 fBottom)
 {
-	pcKeyboardDraw->DrawText(pcDraw, mszText.Text(), (int32)((fLeft + fRight) / 2), (int32)((fTop + fBottom) / 2));
+	CInt32Rect	cClip;
+
+	cClip.Init((int64)fLeft, (int64)fTop, (int64)fRight, (int64)fBottom);
+	pcKeyboardDraw->DrawText(pcDraw, mszText.Text(), (int32)((fLeft + fRight) / 2), (int32)((fTop + fBottom) / 2), &cClip);
 }
 
 
