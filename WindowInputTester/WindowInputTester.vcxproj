@@ -238,6 +238,7 @@
   <ItemGroup>
     <ClCompile Include="WindowInputTester.cpp" />
     <ClCompile Include="WindowInputTesterTick.cpp" />
+    <ClCompile Include="TabNameDialog.cpp" />
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="KeyboardCanvasDraw.cpp" />
@@ -247,6 +248,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowInputTesterTick.h" />
+    <ClInclude Include="TabNameDialog.h" />
     <ClInclude Include="Key.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="KeyboardCanvasDraw.h" />

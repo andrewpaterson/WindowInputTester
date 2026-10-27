@@ -27,6 +27,7 @@
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterTick.h"
+#include "TabNameDialog.h"
 #include "Keyboard.h"
 #include "KeyboardCanvasDraw.h"
 
@@ -159,6 +160,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Ptr<CGridContainer>				pGrid;
 		Ptr<CWindowTheme>				pTheme;
 		Ptr<CTabbedContainer>			pTabbed;
+		Ptr<CTabComponent>				pInputTab;
+		CTabNameListener				cTabNameListener;
 		CColourFormatHelper				cFormat;
 		Ptr<CFont>						pWhite;
 		Ptr<CFontColours>				pFontColours;
@@ -198,8 +201,12 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 1, 0, 1, 1, 1, 1);
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(OMalloc<CKeyboard>(), pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
 			pWindow->GetColourFormat(&cFormat);
-			pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateChevron(JEWEL_BLUE, &cFormat));
+			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateKeyboard(JEWEL_ICON, &cFormat));
 			pTabbed->AddTab("Editor", CreateEditor(pWindow, pTheme, pFontColours), NULL, true);
+
+			//Double clicking a tab other than Input renames it.
+			cTabNameListener.Init(pWindow, pTheme, pInputTab);
+			pTabbed->AddListener(&cTabNameListener);
 
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
@@ -217,6 +224,9 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pWindow->SetWindowSize(1280, 800);
 			pWindow->Show();
 
+			pTabbed->RemoveListener(&cTabNameListener);
+			cTabNameListener.Kill();
+
 			pWindow->SetComponentInput(NULL);
 			cNativeFactory.SetRawInput(NULL, NULL);
 			cComponentInput.Kill();
@@ -230,6 +240,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 
 		pGrid = NULL;
+		pInputTab = NULL;
 		pTabbed = NULL;
 		pTheme = NULL;
 		pFontColours = NULL;

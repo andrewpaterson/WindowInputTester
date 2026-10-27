@@ -7,6 +7,9 @@
     <ClCompile Include="WindowInputTesterTick.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="TabNameDialog.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="Key.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -28,6 +31,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowInputTesterTick.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="TabNameDialog.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Key.h">
