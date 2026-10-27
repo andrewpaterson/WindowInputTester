@@ -36,9 +36,9 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	mpFolderIcon = CJewelButtonImages::CreateFolder(JEWEL_ICON, &cFormat);
 	mpFileIcon = CJewelButtonImages::CreateFile(JEWEL_ICON, &cFormat);
 
-	mpNewEditorTab = pFileMenu->AddItem("New Editor Tab...");
-	mpOpenFile = pFileMenu->AddItem("Open File...", mpFileIcon);
-	mpSaveFile = pFileMenu->AddItem("Save File...");
+	mpNewEditorTab = pFileMenu->AddItem("New...");
+	mpOpenFile = pFileMenu->AddItem("Load...", mpFileIcon);
+	mpSaveFile = pFileMenu->AddItem("Save...");
 }
 
 
@@ -129,8 +129,7 @@ void CFileMenuListener::NewEditorTab(void)
 	CChars	szSuggested;
 	CChars	szName;
 
-	szSuggested.Init("Editor ");
-	szSuggested.Append(miNextEditor);
+	szSuggested.Init("Unnamed");
 	szName.Init();
 	if (AskTabName(mpWindow, mpsLook, "New Editor Tab", szSuggested.Text(), &szName))
 	{
