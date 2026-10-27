@@ -30,6 +30,7 @@
 #include "FileMenuListener.h"
 #include "Keyboard.h"
 #include "KeyboardCanvasDraw.h"
+#include "MouseCanvasDraw.h"
 
 
 #define WINDOW_INPUT_TESTER_EDITOR_TEXT	"The quick brown fox jumps over the lazy dog.\n" \
@@ -128,6 +129,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Ptr<CWindow>					pWindow;
 		Ptr<CWindowInputTesterTick>		pTick;
 		Ptr<CGridContainer>				pGrid;
+		Ptr<CKeyboard>					pKeyboard;
+		Ptr<CMouse>						pMouse;
 		Ptr<CGridContainer>				pMain;
 		Ptr<CMenuBar>					pMenuBar;
 		Ptr<CMenuContainer>				pFileMenu;
@@ -187,11 +190,22 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pWindow->SetContainer(pMain);
 
 			//Two cells on top, each half the width, over one cell spanning both columns.  The rows are each half the height.
+			//The page takes focus when clicked so the keys have somewhere to go.
 			pGrid = OMalloc<CGridContainer>(pWindow);
 			pGrid->SetAlignment(CSH_Stretch, CSV_Stretch);
-			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 0, 0, 1, 1, 1, 1);
+			pGrid->SetCanGetFocus(true);
+			pMouse = OMalloc<CMouse>();
+			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CMouseCanvasDraw>(pMouse)), 0, 0, 1, 1, 1, 1);
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 1, 0, 1, 1, 1, 1);
-			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(OMalloc<CKeyboard>(), pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
+			pKeyboard = OMalloc<CKeyboard>();
+			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
+
+			//Every key and button down and up goes from the focussed component up to the main container, which shows it on
+			//the keyboard and the mouse and passes it on.
+			pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pKeyboard, &CKeyboard::KeyAction);
+			pMain->AddInputAction(IAF_AnyKeyUp, NULL, &pKeyboard, &CKeyboard::KeyAction);
+			pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pMouse, &CMouse::KeyAction);
+			pMain->AddInputAction(IAF_AnyKeyUp, NULL, &pMouse, &CMouse::KeyAction);
 			pWindow->GetColourFormat(&cFormat);
 			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateKeyboard(JEWEL_ICON, &cFormat));
 			cFileMenuListener.Init(pWindow, &sDialogLook, pFontColours, pTabbed, pFileMenu);
@@ -217,6 +231,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			cComponentInput.AddMice();
 			pWindow->SetComponentInput(&cComponentInput);
 
+			pWindow->GetFocus()->SetFocus(pGrid);
 			pWindow->SetWindowSize(1280, 800);
 			pWindow->Show();
 
@@ -241,6 +256,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 
 		pGrid = NULL;
+		pKeyboard = NULL;
+		pMouse = NULL;
 		pFileMenu = NULL;
 		pMenuBar = NULL;
 		pMain = NULL;

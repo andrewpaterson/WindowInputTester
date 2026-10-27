@@ -4,15 +4,18 @@
 
 //////////////////////////////////////////////////////////////////////////
 //
+// szInputName can be NULL for a key no device has.
 //
 //////////////////////////////////////////////////////////////////////////
-void CKey::Init(float32 x, float32 y, float32 fWidth, float32 fHeight, Ptr<CKeyDraw> pDraw)
+void CKey::Init(float32 x, float32 y, float32 fWidth, float32 fHeight, Ptr<CKeyDraw> pDraw, const char* szInputName)
 {
 	PreInit();
 
 	msPosition.Init(x, y);
 	msSize.Init(fWidth, fHeight);
 	mpDraw = pDraw;
+	mszInputName.Init(szInputName);
+	mbPressed = false;
 
 	PostInit();
 }
@@ -27,6 +30,8 @@ void CKey::Class(void)
 	U_2Float32(msPosition);
 	U_2Float32(msSize);
 	M_Pointer(mpDraw);
+	U_String(mszInputName);
+	U_Bool(mbPressed);
 }
 
 
@@ -36,6 +41,7 @@ void CKey::Class(void)
 //////////////////////////////////////////////////////////////////////////
 void CKey::Free(void)
 {
+	mszInputName.Kill();
 }
 
 
@@ -66,3 +72,6 @@ bool CKey::Load(CObjectReader* pcFile)
 SFloat32Vec2 CKey::GetPosition(void) { return msPosition; }
 SFloat32Vec2 CKey::GetSize(void) { return msSize; }
 Ptr<CKeyDraw> CKey::GetDraw(void) { return mpDraw; }
+char* CKey::GetInputName(void) { return mszInputName.Text(); }
+bool CKey::IsPressed(void) { return mbPressed; }
+void CKey::SetPressed(bool bPressed) { mbPressed = bPressed; }

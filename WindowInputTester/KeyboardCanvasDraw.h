@@ -11,8 +11,9 @@
 class CImageDraw;
 
 //Draws a keyboard's keys as anti-aliased rounded rectangles with their legends on them, as large as fits in the
-//canvas and centred in it.  The keyboard is drawn into a cel the size of the canvas, made again only when the canvas
-//changes size, and an image draw puts the cel on the canvas.
+//canvas and centred in it, the pressed keys highlighted.  The keyboard is drawn into a cel the size of the canvas,
+//made again only when the canvas changes size or keys are pressed or released, and an image draw puts the cel on the
+//canvas.  While the window isn't active every key is released, as their releases aren't heard.
 class CKeyboardCanvasDraw : public CCanvasDraw
 {
 CONSTRUCTABLE(CKeyboardCanvasDraw);
@@ -24,6 +25,7 @@ protected:
 	Ptr<CTextLayout>			mpLayout;
 	Ptr<CGlyphListFontDraw>		mpGlyphs;
 	SInt32Vec2					msCelSize;  //The canvas size the cel was made for, -1, -1 for none yet.
+	int32						miCelChanges;  //The keyboard's changes when the cel was made.
 
 public:
 	void		Init(Ptr<CKeyboard> pKeyboard, Ptr<CFont> pFont);

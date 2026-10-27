@@ -6,6 +6,7 @@
 #include "SupportLib/SimpleTextReader.h"
 #include "WindowLib/JewelColours.h"
 #include "WindowLib/Canvas.h"
+#include "WindowLib/Window.h"
 #include "KeyboardCanvasDraw.h"
 
 
@@ -16,6 +17,8 @@
 #define KEYBOARD_KEY_BORDER		JEWEL_BORDER
 #define KEYBOARD_KEY_FACE		JEWEL_PANEL
 #define KEYBOARD_KEY_LEGEND		JEWEL_TEXT  //Of the shapes; the text is in the font's colour.
+#define KEYBOARD_PRESSED_BORDER	JEWEL_BLUE
+#define KEYBOARD_PRESSED_FACE	JEWEL_SELECTION
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -34,6 +37,7 @@ void CKeyboardCanvasDraw::Init(Ptr<CKeyboard> pKeyboard, Ptr<CFont> pFont)
 	mpLayout = OMalloc<CTextLayout>();
 	mpGlyphs = OMalloc<CGlyphListFontDraw>();
 	msCelSize.Init(-1, -1);
+	miCelChanges = 0;
 
 	PostInit();
 }
@@ -52,6 +56,7 @@ void CKeyboardCanvasDraw::Class(void)
 	M_Pointer(mpLayout);
 	M_Pointer(mpGlyphs);
 	U_2Int32(msCelSize);
+	U_Int32(miCelChanges);
 }
 
 
@@ -99,7 +104,12 @@ bool CKeyboardCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 		return true;
 	}
 
-	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || mpCelDraw->GetCel().IsNull())
+	if (!pCanvas->GetWindow()->GetFocus()->IsActive())
+	{
+		mpKeyboard->ReleaseAll();
+	}
+
+	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || (miCelChanges != mpKeyboard->GetChanges()) || mpCelDraw->GetCel().IsNull())
 	{
 		MakeCel(pCanvas, sSize);
 	}
@@ -121,6 +131,8 @@ void CKeyboardCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize)
 	CImageColourARGB	cBackground;
 	CImageColourARGB	cBorder;
 	CImageColourARGB	cFace;
+	CImageColourARGB	cPressedBorder;
+	CImageColourARGB	cPressedFace;
 	CImageColourARGB	cLegend;
 	SFloat32Vec2		sKeyboardSize;
 	float64				fUnit;
@@ -153,6 +165,8 @@ void CKeyboardCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize)
 	cBackground.Init(1.0f, Get8BitRedColour(KEYBOARD_BACKGROUND) / 255.0f, Get8BitGreenColour(KEYBOARD_BACKGROUND) / 255.0f, Get8BitBlueColour(KEYBOARD_BACKGROUND) / 255.0f);
 	cBorder.Init(1.0f, Get8BitRedColour(KEYBOARD_KEY_BORDER) / 255.0f, Get8BitGreenColour(KEYBOARD_KEY_BORDER) / 255.0f, Get8BitBlueColour(KEYBOARD_KEY_BORDER) / 255.0f);
 	cFace.Init(1.0f, Get8BitRedColour(KEYBOARD_KEY_FACE) / 255.0f, Get8BitGreenColour(KEYBOARD_KEY_FACE) / 255.0f, Get8BitBlueColour(KEYBOARD_KEY_FACE) / 255.0f);
+	cPressedBorder.Init(1.0f, Get8BitRedColour(KEYBOARD_PRESSED_BORDER) / 255.0f, Get8BitGreenColour(KEYBOARD_PRESSED_BORDER) / 255.0f, Get8BitBlueColour(KEYBOARD_PRESSED_BORDER) / 255.0f);
+	cPressedFace.Init(1.0f, Get8BitRedColour(KEYBOARD_PRESSED_FACE) / 255.0f, Get8BitGreenColour(KEYBOARD_PRESSED_FACE) / 255.0f, Get8BitBlueColour(KEYBOARD_PRESSED_FACE) / 255.0f);
 
 	cDraw.Init(&pImage);
 	cDraw.SetColour(&cBackground);
@@ -171,12 +185,14 @@ void CKeyboardCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize)
 		fRight = (int32)(fOriginX + (sPosition.x + sKeySize.x) * fUnit - KEYBOARD_KEY_GAP);
 		fBottom = (int32)(fOriginY + (sPosition.y + sKeySize.y) * fUnit - KEYBOARD_KEY_GAP);
 
-		cDraw.SetColour(&cBorder);
+		cDraw.SetColour(pKey->IsPressed() ? &cPressedBorder : &cBorder);
 		cDraw.DrawRoundedRectangle(fLeft, fTop, fRight, fBottom, fRadius);
-		cDraw.SetColour(&cFace);
+		cDraw.SetColour(pKey->IsPressed() ? &cPressedFace : &cFace);
 		cDraw.DrawRoundedRectangle(fLeft + 1, fTop + 1, fRight - 1, fBottom - 1, fRadius - 1);
 	}
 	cDraw.Kill();
+	cPressedFace.Kill();
+	cPressedBorder.Kill();
 	cFace.Kill();
 	cBorder.Kill();
 	cBackground.Kill();
@@ -205,6 +221,7 @@ void CKeyboardCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize)
 
 	mpCelDraw->SetCel(OMalloc<CImageCel>(pImage));
 	msCelSize = sSize;
+	miCelChanges = mpKeyboard->GetChanges();
 }
 
 

@@ -244,6 +244,8 @@
     <ClCompile Include="Key.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="KeyboardCanvasDraw.cpp" />
+    <ClCompile Include="MouseCanvasDraw.cpp" />
+    <ClCompile Include="Mouse.cpp" />
     <ClCompile Include="KeyDraw.cpp" />
     <ClCompile Include="TextKeyDraw.cpp" />
     <ClCompile Include="ShapeKeyDraw.cpp" />
@@ -256,6 +258,8 @@
     <ClInclude Include="Key.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="KeyboardCanvasDraw.h" />
+    <ClInclude Include="MouseCanvasDraw.h" />
+    <ClInclude Include="Mouse.h" />
     <ClInclude Include="KeyDraw.h" />
     <ClInclude Include="TextKeyDraw.h" />
     <ClInclude Include="ShapeKeyDraw.h" />

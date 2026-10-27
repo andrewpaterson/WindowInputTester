@@ -25,6 +25,12 @@
     <ClCompile Include="KeyboardCanvasDraw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="MouseCanvasDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Mouse.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="KeyDraw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -55,6 +61,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="KeyboardCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="MouseCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Mouse.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="KeyDraw.h">
