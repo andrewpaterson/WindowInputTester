@@ -1,7 +1,7 @@
 #ifndef __MOUSE_H__
 #define __MOUSE_H__
 #include "StandardLib/Object.h"
-#include "WindowLib/ComponentInputEvent.h"
+#include "WindowLib/ComponentInput.h"
 
 
 #define MOUSE_PRESSED_LEFT		0x01
@@ -11,8 +11,10 @@
 #define MOUSE_ROLLED_DOWN		0x10
 
 
-//What a mouse's buttons and wheel are doing, as KeyAction hears them from the input devices: button 1 is the left
-//button, 2 the right and 3 the wheel's.  The wheel has no release so it counts as rolled for a moment after each roll.
+//What a mouse's buttons and wheel are doing: button 1 is the left button, 2 the right and 3 the wheel's.  The buttons
+//are read from the devices by Update, as the chords hold back a button's event while a modifier is down (control and
+//click).  A roll of the wheel is only an event, which KeyAction hears; the wheel has no release so it counts as rolled
+//for a moment after each roll.
 class CMouse : public CObject
 {
 CONSTRUCTABLE(CMouse);
@@ -31,6 +33,7 @@ public:
 	bool	Save(CObjectWriter* pcFile) override;
 	bool	Load(CObjectReader* pcFile) override;
 
+	void	Update(CComponentInput* pcInput);
 	void	KeyAction(SComponentInputEvent* psEvent);
 	void	ReleaseAll(void);
 	int32	GetState(int64 iNow);

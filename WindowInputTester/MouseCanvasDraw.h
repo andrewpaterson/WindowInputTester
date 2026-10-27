@@ -15,8 +15,8 @@ class CImageColourARGB;
 //pressed key is; the arrow of the way the wheel was rolled lights up for a moment.
 //
 //The mouse is drawn into a cel the size of the canvas, made again only when the canvas changes size or what the
-//mouse is doing changes, and an image draw puts the cel on the canvas.  While the window isn't active every button is
-//released, as their releases aren't heard.
+//mouse is doing changes, and an image draw puts the cel on the canvas.  The buttons are read from the window's
+//component input each time it is drawn; while the window isn't active every button is released.
 class CMouseCanvasDraw : public CCanvasDraw
 {
 CONSTRUCTABLE(CMouseCanvasDraw);

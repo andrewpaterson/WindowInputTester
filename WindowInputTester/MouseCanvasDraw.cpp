@@ -108,8 +108,9 @@ bool CMouseCanvasDraw::Load(CObjectReader* pcFile)
 //////////////////////////////////////////////////////////////////////////
 bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 {
-	SInt32Vec2	sSize;
-	int32		iState;
+	SInt32Vec2			sSize;
+	int32				iState;
+	CComponentInput*	pcInput;
 
 	sSize = pCanvas->GetActualSize();
 	if ((sSize.x <= 0) || (sSize.y <= 0))
@@ -117,9 +118,14 @@ bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 		return true;
 	}
 
+	pcInput = pCanvas->GetWindow()->GetComponentInput();
 	if (!pCanvas->GetWindow()->GetFocus()->IsActive())
 	{
 		mpMouse->ReleaseAll();
+	}
+	else if (pcInput)
+	{
+		mpMouse->Update(pcInput);
 	}
 
 	iState = mpMouse->GetState(GetDebugTickCount());

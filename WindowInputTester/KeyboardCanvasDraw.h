@@ -13,7 +13,8 @@ class CImageDraw;
 //Draws a keyboard's keys as anti-aliased rounded rectangles with their legends on them, as large as fits in the
 //canvas and centred in it, the pressed keys highlighted.  The keyboard is drawn into a cel the size of the canvas,
 //made again only when the canvas changes size or keys are pressed or released, and an image draw puts the cel on the
-//canvas.  While the window isn't active every key is released, as their releases aren't heard.
+//canvas.  The keys are read from the window's component input each time it is drawn; while the window isn't active
+//every key is released.
 class CKeyboardCanvasDraw : public CCanvasDraw
 {
 CONSTRUCTABLE(CKeyboardCanvasDraw);

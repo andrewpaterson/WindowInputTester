@@ -98,11 +98,11 @@ void CKeyboard::Init(void)
 
 	y += 1;
 	AddKey(0, y, 1.25f, 1, "ctrl", "Left Control");
-	AddKey(1.25f, y, 1.25f, 1, "option", "Left Alt");
-	AddKey(2.5f, y, 1.25f, 1, "cmd", "Left Special");
+	AddKey(1.25f, y, 1.25f, 1, "option", "Left Special");
+	AddKey(2.5f, y, 1.25f, 1, "alt", "Left Alt");
 	AddKey(3.75f, y, 6.25f, 1, "", "Space");
-	AddKey(10, y, 1.25f, 1, "cmd", "Right Special");
-	AddKey(11.25f, y, 1.25f, 1, "option", "Right Alt");
+	AddKey(10, y, 1.25f, 1, "alt", "Right Alt");
+	AddKey(11.25f, y, 1.25f, 1, "option", "Right Special");
 	AddKey(12.5f, y, 1.25f, 1, "fn", NULL);
 	AddKey(13.75f, y, 1.25f, 1, "ctrl", "Right Control");
 	AddRow(fNavigation, y, aszArrows, aszArrowNames);
@@ -197,26 +197,27 @@ float32 CKeyboard::AddRow(float32 x, float32 y, const char** aszTexts, const cha
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Every key with the input name, as some names could be on two keys.
+// Each key with an input name is pressed if any keyboard of pcInput has
+// that key down.
 //
 //////////////////////////////////////////////////////////////////////////
-void CKeyboard::SetPressed(const char* szInputName, bool bPressed)
+void CKeyboard::Update(CComponentInput* pcInput)
 {
 	size		i;
 	Ptr<CKey>	pKey;
-
-	if (StrEmpty(szInputName))
-	{
-		return;
-	}
+	bool		bPressed;
 
 	for (i = 0; i < maKeys.Size(); i++)
 	{
 		pKey = maKeys.Get(i);
-		if ((pKey->IsPressed() != bPressed) && (StringCompare(pKey->GetInputName(), szInputName) == 0))
+		if (!StrEmpty(pKey->GetInputName()))
 		{
-			pKey->SetPressed(bPressed);
-			miChanges++;
+			bPressed = pcInput->IsSourceDown(pKey->GetInputName());
+			if (pKey->IsPressed() != bPressed)
+			{
+				pKey->SetPressed(bPressed);
+				miChanges++;
+			}
 		}
 	}
 }
@@ -243,18 +244,6 @@ void CKeyboard::ReleaseAll(void)
 	}
 }
 
-
-//////////////////////////////////////////////////////////////////////////
-//
-// The input action for every key down and up.  The event is passed on so
-// the key still types or gives its command.
-//
-//////////////////////////////////////////////////////////////////////////
-void CKeyboard::KeyAction(SComponentInputEvent* psEvent)
-{
-	SetPressed(psEvent->szName, psEvent->eType == CIET_KeyDown);
-	psEvent->bPass = true;
-}
 
 
 //////////////////////////////////////////////////////////////////////////

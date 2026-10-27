@@ -96,7 +96,8 @@ bool CKeyboardCanvasDraw::Load(CObjectReader* pcFile)
 //////////////////////////////////////////////////////////////////////////
 bool CKeyboardCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 {
-	SInt32Vec2	sSize;
+	SInt32Vec2			sSize;
+	CComponentInput*	pcInput;
 
 	sSize = pCanvas->GetActualSize();
 	if ((sSize.x <= 0) || (sSize.y <= 0))
@@ -104,9 +105,14 @@ bool CKeyboardCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 		return true;
 	}
 
+	pcInput = pCanvas->GetWindow()->GetComponentInput();
 	if (!pCanvas->GetWindow()->GetFocus()->IsActive())
 	{
 		mpKeyboard->ReleaseAll();
+	}
+	else if (pcInput)
+	{
+		mpKeyboard->Update(pcInput);
 	}
 
 	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || (miCelChanges != mpKeyboard->GetChanges()) || mpCelDraw->GetCel().IsNull())

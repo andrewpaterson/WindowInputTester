@@ -70,38 +70,36 @@ bool CMouse::Load(CObjectReader* pcFile)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// The input action for every key and button down and up.  The event is
-// passed on so the button still clicks and the wheel still scrolls.
+// The buttons are down if any mouse of pcInput has them down.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouse::Update(CComponentInput* pcInput)
+{
+	mbLeft = pcInput->IsSourceDown("Button 1");
+	mbRight = pcInput->IsSourceDown("Button 2");
+	mbWheel = pcInput->IsSourceDown("Button 3");
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The input action for every key and button down.  The event is passed on
+// so the wheel still scrolls.
 //
 //////////////////////////////////////////////////////////////////////////
 void CMouse::KeyAction(SComponentInputEvent* psEvent)
 {
-	bool	bDown;
-
 	psEvent->bPass = true;
 	if (psEvent->szName == NULL)
 	{
 		return;
 	}
 
-	bDown = psEvent->eType == CIET_KeyDown;
-	if (StringCompare(psEvent->szName, "Button 1") == 0)
-	{
-		mbLeft = bDown;
-	}
-	else if (StringCompare(psEvent->szName, "Button 2") == 0)
-	{
-		mbRight = bDown;
-	}
-	else if (StringCompare(psEvent->szName, "Button 3") == 0)
-	{
-		mbWheel = bDown;
-	}
-	else if (bDown && (StringCompare(psEvent->szName, "Wheel Forward") == 0))
+	if (StringCompare(psEvent->szName, "Wheel Forward") == 0)
 	{
 		miRolledUp = GetDebugTickCount();
 	}
-	else if (bDown && (StringCompare(psEvent->szName, "Wheel Backward") == 0))
+	else if (StringCompare(psEvent->szName, "Wheel Backward") == 0)
 	{
 		miRolledDown = GetDebugTickCount();
 	}
