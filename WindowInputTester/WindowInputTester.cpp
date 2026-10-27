@@ -18,6 +18,12 @@
 #include "WindowLib/Canvas.h"
 #include "WindowLib/JewelColours.h"
 #include "WindowLib/ComponentInput.h"
+#include "WindowLib/JewelTheme.h"
+#include "WindowLib/TabbedContainer.h"
+#include "WindowLib/FillContainer.h"
+#include "WindowLib/ScrollPane.h"
+#include "WindowLib/TextArea.h"
+#include "WindowLib/JewelButtonImages.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterTick.h"
@@ -40,6 +46,40 @@ Ptr<CCanvas> CreateCanvas(Ptr<CWindow> pWindow, Ptr<CCanvasDraw> pDraw)
 	pCanvas = OMalloc<CCanvas>(pWindow, pDraw);
 	pCanvas->SetAlignment(CSH_Stretch, CSV_Stretch);
 	return pCanvas;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// An editable text area in a scroll pane over the editor's colour.
+//
+//////////////////////////////////////////////////////////////////////////
+Ptr<CFillContainer> CreateEditor(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFontColours> pFontColours)
+{
+	Ptr<CFillContainer>		pEditor;
+	Ptr<CScrollPane>		pScroll;
+	Ptr<CTextArea>			pTextArea;
+
+	pTextArea = OMalloc<CTextArea>(pWindow, pFontColours,
+		"The quick brown fox jumps over the lazy dog.\n"
+		"\n"
+		"Type here.  Arrows, Home and End, Page Up and Down move the caret; with Shift they select.\n"
+		"Tab indents, Shift+Tab outdents, Control+D duplicates and Control+X, C and V use the clipboard.");
+	pTextArea->SetColour(JEWEL_TEXT);
+	pTextArea->SetMarkColours(pTheme->GetTextSelectionColour(), pTheme->GetCaretColour());
+	pTextArea->SetWordWrap(true);
+	pTextArea->SetAlignment(CSH_Stretch, CSV_Stretch);
+
+	pScroll = OMalloc<CScrollPane>(pWindow, pTheme);
+	pScroll->SetAlignment(CSH_Stretch, CSV_Stretch);
+	pScroll->SetPolicy(SBO_Horizontal, SPP_Never);
+	pScroll->SetContent(pTextArea);
+
+	pEditor = OMalloc<CFillContainer>(pWindow);
+	pEditor->SetAlignment(CSH_Stretch, CSV_Stretch);
+	pEditor->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)));
+	pEditor->AddComponent(pScroll);
+	return pEditor;
 }
 
 
@@ -117,10 +157,14 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		Ptr<CWindow>					pWindow;
 		Ptr<CWindowInputTesterTick>		pTick;
 		Ptr<CGridContainer>				pGrid;
+		Ptr<CWindowTheme>				pTheme;
+		Ptr<CTabbedContainer>			pTabbed;
+		CColourFormatHelper				cFormat;
 		Ptr<CFont>						pWhite;
 		Ptr<CFontColours>				pFontColours;
 		CInput							cInput;
 		CWinInput						cWinInput;
+		Ptr<CWindowInputSource>			pInputSource;
 		CComponentInput					cComponentInput;
 
 		cNativeFactory.Init(&gcMemoryAllocator,
@@ -143,13 +187,19 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		if (pWhite.IsNotNull())
 		{
 			pFontColours = OMalloc<CFontColours>(pWhite);
+			pTheme = CJewelTheme::CreateDarkTheme(pWindow, pFontColours->GetFont(JEWEL_TEXT));
+			pTabbed = OMalloc<CTabbedContainer>(pWindow, pTheme);
+			pWindow->SetContainer(pTabbed);
 
 			//Two cells on top, each half the width, over one cell spanning both columns.  The rows are each half the height.
 			pGrid = OMalloc<CGridContainer>(pWindow);
-			pWindow->SetContainer(pGrid);
+			pGrid->SetAlignment(CSH_Stretch, CSV_Stretch);
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 0, 0, 1, 1, 1, 1);
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 1, 0, 1, 1, 1, 1);
 			pGrid->AddComponent(CreateCanvas(pWindow, OMalloc<CKeyboardCanvasDraw>(OMalloc<CKeyboard>(), pFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
+			pWindow->GetColourFormat(&cFormat);
+			pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateChevron(JEWEL_BLUE, &cFormat));
+			pTabbed->AddTab("Editor", CreateEditor(pWindow, pTheme, pFontColours), NULL, true);
 
 			//The devices are described by the XML so they are added after it is read.
 			cInput.Init(NULL);
@@ -158,7 +208,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			cInput.AddNativeInput(&cWinInput);
 			cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
-			cComponentInput.Init(&cInput, &pWindow);
+			pInputSource = OMalloc<CWindowInputSource>(&cInput);
+			cComponentInput.Init(&pInputSource, &pWindow);
 			cComponentInput.AddKeyboards();
 			cComponentInput.AddMice();
 			pWindow->SetComponentInput(&cComponentInput);
@@ -169,6 +220,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pWindow->SetComponentInput(NULL);
 			cNativeFactory.SetRawInput(NULL, NULL);
 			cComponentInput.Kill();
+			pInputSource = NULL;
 			cInput.Kill();
 			cWinInput.Kill();
 		}
@@ -178,6 +230,8 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 
 		pGrid = NULL;
+		pTabbed = NULL;
+		pTheme = NULL;
 		pFontColours = NULL;
 		pWhite = NULL;
 		ORoot()->Remove(pWindow);
