@@ -19,7 +19,7 @@
 #include "WindowLib/ComponentInput.h"
 #include "WindowLib/JewelTheme.h"
 #include "WindowLib/TabbedContainer.h"
-#include "WindowLib/JewelButtonImages.h"
+#include "WindowLib/JewelImageGenerator.h"
 #include "WindowLib/MenuBar.h"
 #include "WindowLib/Dialog.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
@@ -204,7 +204,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pMouse, &CMouse::KeyAction);
 			pMain->AddInputAction(IAF_Movement, NULL, &pMouse, &CMouse::MovementAction);
 			pWindow->GetColourFormat(&cFormat);
-			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelButtonImages::CreateKeyboard(JEWEL_ICON, &cFormat));
+			pInputTab = pTabbed->AddTab("Input", pGrid, CJewelImageGenerator::CreateKeyboard(JEWEL_ICON, &cFormat));
 			cFileMenuListener.Init(pWindow, &sDialogLook, pFontColours, pTabbed, pFileMenu);
 			pMenuBar->AddListener(&cFileMenuListener);
 			cFileMenuListener.AddEditorTab("Editor", WINDOW_INPUT_TESTER_EDITOR_TEXT);
