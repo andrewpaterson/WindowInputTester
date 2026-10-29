@@ -1,6 +1,5 @@
 #include <windows.h>
 #include "BaseLib/Logger.h"
-#include "BaseLib/FastFunctions.h"
 #include "BaseLib/TypeNames.h"
 #include "BaseLib/TypeConverter.h"
 #include "BaseLib/GlobalMemory.h"
@@ -113,7 +112,6 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	_CrtSetBreakAlloc(0);
 
 	gcLogger.Init();
-	FastFunctionsInit();
 	TypesInit();
 	TypeConverterInit();
 	MemoryInit();
@@ -282,7 +280,6 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	MemoryKill();
 	TypeConverterKill();
 	TypesKill();
-	FastFunctionsKill();
 
 	gcLogger.Kill();
 
