@@ -50,7 +50,7 @@ void CTextKeyDraw::Draw(CImageDraw* pcDraw, CKeyboardCanvasDraw* pcKeyboardDraw,
 {
 	CInt32Rect	cClip;
 
-	cClip.Init((int64)fLeft, (int64)fTop, (int64)fRight, (int64)fBottom);
+	cClip.Init((int32)fLeft, (int32)fTop, (int32)fRight, (int32)fBottom);
 	pcKeyboardDraw->DrawText(pcDraw, mszText.Text(), (int32)((fLeft + fRight) / 2), (int32)((fTop + fBottom) / 2), &cClip);
 }
 
