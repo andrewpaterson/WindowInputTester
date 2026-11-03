@@ -4,6 +4,9 @@
     <ClCompile Include="WindowInputTester.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="WindowInputTesterApp.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="WindowInputTesterTick.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -42,6 +45,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="WindowInputTesterApp.h">
+      <Filter>Source</Filter>
+    </ClInclude>
     <ClInclude Include="WindowInputTesterTick.h">
       <Filter>Source</Filter>
     </ClInclude>
