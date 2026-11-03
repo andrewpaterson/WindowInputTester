@@ -90,12 +90,33 @@ Ptr<CFont> GenerateFont(const char* szFontFilename, const char* szName, float32 
 
 //////////////////////////////////////////////////////////////////////////
 //
+// Before it is set up.
+//
+//////////////////////////////////////////////////////////////////////////
+void CWindowInputTesterApp::Init(void)
+{
+	PreInit();
+
+	memset(&msDialogLook, 0, sizeof(SDialogLook));
+	msDialogs.pcFileMenu = NULL;
+	msDialogs.pcTabNames = NULL;
+	mbValid = false;
+	mbInputs = false;
+
+	PostInit();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
 // The window, its tabs, menu and listeners.  The devices are described by
 // the XML in szInputDirectory; pcNativeInput (the platform's keyboard and
 // mouse) is added to them.  Run fails if anything here did.
+// Call it once the app is in the root, so that what is made here is
+// built under the root rather than as an unrooted graph.
 //
 //////////////////////////////////////////////////////////////////////////
-void CWindowInputTesterApp::Init(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory)
+bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory)
 {
 	Ptr<CFont>				pWhite;
 	Ptr<CGridContainer>		pMain;
@@ -105,13 +126,6 @@ void CWindowInputTesterApp::Init(CNativeWindowFactory* pcNativeFactory, CNativeI
 	Ptr<CKeyboard>			pKeyboard;
 	Ptr<CMouse>				pMouse;
 	CColourFormatHelper		cFormat;
-
-	PreInit();
-
-	memset(&msDialogLook, 0, sizeof(SDialogLook));
-	msDialogs.pcFileMenu = NULL;
-	msDialogs.pcTabNames = NULL;
-	mbInputs = false;
 
 	mpWindow = OMalloc<CWindow>("Window Input Tester", pcNativeFactory, OMalloc<CWindowInputTesterTick>(&msDialogs), OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 
@@ -180,8 +194,7 @@ void CWindowInputTesterApp::Init(CNativeWindowFactory* pcNativeFactory, CNativeI
 		mpWindow->GetFocus()->SetFocus(pGrid);
 		mpWindow->SetWindowSize(1280, 800);
 	}
-
-	PostInit();
+	return mbValid;
 }
 
 

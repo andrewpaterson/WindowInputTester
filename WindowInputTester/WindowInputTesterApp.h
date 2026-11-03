@@ -41,7 +41,8 @@ protected:
 	bool						mbInputs;  //The listeners and the component input are set up.
 
 public:
-	void	Init(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory);
+	void	Init(void);
+	bool	Setup(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory);
 	void	Class(void) override;
 	void	Free(void) override;
 
