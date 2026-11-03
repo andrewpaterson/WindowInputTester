@@ -56,13 +56,17 @@ void CWindowInputTesterTick::Free(void)
 //////////////////////////////////////////////////////////////////////////
 void CWindowInputTesterTick::Tick(Ptr<CWindow> pWindow, int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMillieconds)
 {
-	pWindow->Paint();
-
 	if (miSnapshotTicks >= 0)
 	{
 		if (miSnapshotTicks == 0)
 		{
 			SavePNG(pWindow->GetCanvas()->GetImageOrNull(), WINDOW_INPUT_TESTER_SNAPSHOT_FILENAME);
+		}
+		else
+		{
+			//The window would otherwise wait for input before the next tick.
+			pWindow->Invalidate();
+			pWindow->RequestTick(0);
 		}
 		miSnapshotTicks--;
 	}
