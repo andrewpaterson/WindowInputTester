@@ -6,6 +6,7 @@
 #include "WindowLib/MenuListener.h"
 #include "WindowLib/TabbedContainer.h"
 #include "WindowLib/Dialog.h"
+#include "WindowLib/FileChooser.h"
 #include "EditorPage.h"
 
 
@@ -24,9 +25,10 @@ enum EFileMenuDialog
 //tab's text to, starting on the file it was last loaded from or saved to, and renames the tab after it; it does
 //nothing if the selected tab isn't an editor.
 //Clicking an item only asks for its dialog; the window's tick shows it with ShowDialog.
-class CFileMenuListener : public CMenuListener
+class CFileMenuListener : public CObject, public CMenuListener
 {
 CONSTRUCTABLE(CFileMenuListener);
+DESTRUCTABLE(CFileMenuListener);
 protected:
 	Ptr<CWindow>			mpWindow;
 	SDialogLook*			mpsLook;
@@ -37,13 +39,18 @@ protected:
 	Ptr<CMenuItem>			mpSaveFile;
 	Ptr<CImageCel>			mpFolderIcon;
 	Ptr<CImageCel>			mpFileIcon;
+	Ptr<CFileChooser>		mpChooser;  //While Load or Save's chooser is shown.
 	CChars					mszLastFile;  //The file last opened or saved, empty if none has been.
 	int						miNextEditor;  //The number in the next tab's suggested name.
 	EFileMenuDialog			meDialog;  //The dialog to show next tick.
 
 public:
 	void					Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFontColours> pFontColours, Ptr<CTabbedContainer> pTabbed, Ptr<CMenuContainer> pFileMenu);
-	void					Kill(void);
+	void					Class(void) override;
+	void					Free(void) override;
+
+	bool					Save(CObjectWriter* pcFile) override;
+	bool					Load(CObjectReader* pcFile) override;
 
 	Ptr<CTabComponent>		AddEditorTab(const char* szName, const char* szText);
 	void					MenuItemClicked(CUnknown* pcSource, void* pvContext) override;

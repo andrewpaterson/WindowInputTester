@@ -1,4 +1,6 @@
 #include "StandardLib/Objects.h"
+#include "StandardLib/ObjectReader.h"
+#include "StandardLib/ObjectWriter.h"
 #include "TabNameListener.h"
 
 
@@ -15,20 +17,23 @@
 //////////////////////////////////////////////////////////////////////////
 bool AskTabName(Ptr<CWindow> pOwner, SDialogLook* psLook, const char* szTitle, const char* szName, CChars* pszName)
 {
-	CDialog				cDialog;
+	Ptr<CDialog>		pDialog;
 	Ptr<CTextField>		pName;
 	bool				bResult;
 
-	cDialog.Init(pOwner, psLook, szTitle);
-	pName = cDialog.AddTextField("Name", szName);
-	bResult = cDialog.Show(TAB_NAME_DIALOG_WIDTH) && (pName->GetText()[0] != '\0');
+	//Nothing else holds the dialog so it's in the root while it's shown.
+	pDialog = OMalloc<CDialog>(pOwner, psLook, szTitle);
+	ORoot()->Add(pDialog);
+	pName = pDialog->AddTextField("Name", szName);
+	bResult = pDialog->Show(TAB_NAME_DIALOG_WIDTH) && (pName->GetText()[0] != '\0');
 	if (bResult)
 	{
 		pszName->Set(pName->GetText());
 	}
 
 	pName = NULL;
-	cDialog.Kill();
+	ORoot()->Remove(pDialog);
+	pDialog = NULL;
 	return bResult;
 }
 
@@ -39,10 +44,14 @@ bool AskTabName(Ptr<CWindow> pOwner, SDialogLook* psLook, const char* szTitle, c
 //////////////////////////////////////////////////////////////////////////
 void CTabNameListener::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabComponent> pInputTab)
 {
+	PreInit();
+
 	mpOwner = pOwner;
 	mpsLook = psLook;
 	mpInputTab = pInputTab;
 	mpRenameTab = NULL;
+
+	PostInit();
 }
 
 
@@ -50,12 +59,45 @@ void CTabNameListener::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabCo
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CTabNameListener::Kill(void)
+void CTabNameListener::Class(void)
 {
-	mpRenameTab = NULL;
-	mpInputTab = NULL;
-	mpsLook = NULL;
-	mpOwner = NULL;
+	M_Pointer(mpOwner);
+	U_Pointer(mpsLook);
+	M_Pointer(mpInputTab);
+	M_Pointer(mpRenameTab);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// A listener isn't saved.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CTabNameListener::Save(CObjectWriter* pcFile)
+{
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CTabNameListener::Load(CObjectReader* pcFile)
+{
+	return false;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CTabNameListener::Free(void)
+{
+	//An object's memory is freed without its destructor running so the listener takes itself off the tabs.
+	RemoveFromListenerCalls();
 }
 
 

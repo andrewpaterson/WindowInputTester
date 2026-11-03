@@ -1,5 +1,7 @@
 #include "BaseLib/FileUtil.h"
 #include "StandardLib/Objects.h"
+#include "StandardLib/ObjectReader.h"
+#include "StandardLib/ObjectWriter.h"
 #include "WindowLib/FileChooser.h"
 #include "WindowLib/JewelImageGenerator.h"
 #include "WindowLib/JewelColours.h"
@@ -24,6 +26,8 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 {
 	CColourFormatHelper		cFormat;
 
+	PreInit();
+
 	mpWindow = pWindow;
 	mpsLook = psLook;
 	mpFontColours = pFontColours;
@@ -39,6 +43,8 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	mpNewEditorTab = pFileMenu->AddItem("New...");
 	mpOpenFile = pFileMenu->AddItem("Load...", mpFileIcon);
 	mpSaveFile = pFileMenu->AddItem("Save...");
+
+	PostInit();
 }
 
 
@@ -46,18 +52,55 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CFileMenuListener::Kill(void)
+void CFileMenuListener::Class(void)
 {
+	M_Pointer(mpWindow);
+	U_Pointer(mpsLook);
+	M_Pointer(mpFontColours);
+	M_Pointer(mpTabbed);
+	M_Pointer(mpNewEditorTab);
+	M_Pointer(mpOpenFile);
+	M_Pointer(mpSaveFile);
+	M_Pointer(mpFolderIcon);
+	M_Pointer(mpFileIcon);
+	M_Pointer(mpChooser);
+	U_String(mszLastFile);
+	U_Int32(miNextEditor);
+	U_Enum(meDialog);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// A listener isn't saved.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CFileMenuListener::Save(CObjectWriter* pcFile)
+{
+	return false;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+bool CFileMenuListener::Load(CObjectReader* pcFile)
+{
+	return false;
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void CFileMenuListener::Free(void)
+{
+	//An object's memory is freed without its destructor running so the listener takes itself off the menu bar.
+	RemoveFromListenerCalls();
 	mszLastFile.Kill();
-	mpFileIcon = NULL;
-	mpFolderIcon = NULL;
-	mpSaveFile = NULL;
-	mpOpenFile = NULL;
-	mpNewEditorTab = NULL;
-	mpTabbed = NULL;
-	mpFontColours = NULL;
-	mpsLook = NULL;
-	mpWindow = NULL;
 }
 
 
@@ -68,7 +111,7 @@ void CFileMenuListener::Kill(void)
 //////////////////////////////////////////////////////////////////////////
 Ptr<CTabComponent> CFileMenuListener::AddEditorTab(const char* szName, const char* szText)
 {
-	return mpTabbed->AddTab(szName, OMalloc<CEditorPage>(mpWindow, mpsLook->pTheme, mpFontColours, szText), NULL, true);
+	return mpTabbed->AddTab(szName, OMalloc<CEditorPage>(mpWindow, mpsLook->pcTheme, mpFontColours, szText), NULL, true);
 }
 
 
@@ -149,19 +192,18 @@ void CFileMenuListener::NewEditorTab(void)
 //////////////////////////////////////////////////////////////////////////
 void CFileMenuListener::OpenFile(void)
 {
-	CFileChooser		cChooser;
 	CFileUtil			cFileUtil;
 	Ptr<CEditorPage>	pEditor;
 	CChars				szName;
 	char*				szFilename;
 
-	cChooser.Init(mpWindow, mpsLook, "Open File", false, mszLastFile.Text(), gasTextFileTypes, sizeof(gasTextFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
-	if (cChooser.Show())
+	mpChooser = OMalloc<CFileChooser>(mpWindow, mpsLook, "Open File", false, mszLastFile.Text(), gasTextFileTypes, sizeof(gasTextFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
+	if (mpChooser->Show())
 	{
-		szFilename = cChooser.GetChosen();
+		szFilename = mpChooser->GetChosen();
 		mszLastFile.Set(szFilename);
 
-		pEditor = OMalloc<CEditorPage>(mpWindow, mpsLook->pTheme, mpFontColours, "");
+		pEditor = OMalloc<CEditorPage>(mpWindow, mpsLook->pcTheme, mpFontColours, "");
 		if (pEditor->LoadText(szFilename))
 		{
 			szName.Init();
@@ -170,7 +212,7 @@ void CFileMenuListener::OpenFile(void)
 			szName.Kill();
 		}
 	}
-	cChooser.Kill();
+	mpChooser = NULL;
 }
 
 
@@ -182,7 +224,6 @@ void CFileMenuListener::OpenFile(void)
 //////////////////////////////////////////////////////////////////////////
 void CFileMenuListener::SaveFile(void)
 {
-	CFileChooser		cChooser;
 	CFileUtil			cFileUtil;
 	Ptr<CEditorPage>	pEditor;
 	CChars				szStart;
@@ -208,10 +249,10 @@ void CFileMenuListener::SaveFile(void)
 		szName.Kill();
 	}
 
-	cChooser.Init(mpWindow, mpsLook, "Save File", true, szStart.Text(), gasTextFileTypes, sizeof(gasTextFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
-	if (cChooser.Show())
+	mpChooser = OMalloc<CFileChooser>(mpWindow, mpsLook, "Save File", true, szStart.Text(), gasTextFileTypes, sizeof(gasTextFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
+	if (mpChooser->Show())
 	{
-		szFilename = cChooser.GetChosen();
+		szFilename = mpChooser->GetChosen();
 		if (pEditor->SaveText(szFilename))
 		{
 			mszLastFile.Set(szFilename);
@@ -221,7 +262,7 @@ void CFileMenuListener::SaveFile(void)
 			szName.Kill();
 		}
 	}
-	cChooser.Kill();
+	mpChooser = NULL;
 	szStart.Kill();
 }
 
