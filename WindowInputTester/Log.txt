@@ -1,6 +1,0 @@
------------------------------------------------------------
-- Log File: [Log.txt]
------------------------------------------------------------
-
-ERROR: (XMLFile.cpp:100) bool __thiscall CXMLFile::Read(const char *,class CMarkupDoc *,class CChars *) Could not read XML file [D:\gameengine\CommonLibraries\WinInputLib\xml\InputDevices.xml].
-ERROR: InputDevices.xml not found or could not be parsed

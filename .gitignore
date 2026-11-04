@@ -8,3 +8,4 @@
 /x64/Debug/*
 /x64/Release/*
 /WindowInputTester/Output/*
+WindowInputTester/Log.txt
