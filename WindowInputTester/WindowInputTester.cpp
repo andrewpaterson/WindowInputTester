@@ -50,8 +50,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		//The app (its window, listeners and input) is held by the root while it runs.
 		pApp = OMalloc<CWindowInputTesterApp>();
 		ORoot()->Add(pApp);
-		pApp->Setup(&cNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml");
-		bResult = pApp->Run();
+		bResult = pApp->Setup(&cNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml") && pApp->Run();
 		ORoot()->Remove(pApp);
 		pApp = NULL;
 
