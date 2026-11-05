@@ -172,7 +172,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		mpWindow->GetColourFormat(&cFormat);
 		pInputTab = mpTabbed->AddTab("Input", pGrid, CJewelImageGenerator::CreateKeyboard(JEWEL_ICON, &cFormat));
 		mpFileMenuListener = OMalloc<CFileMenuListener>(mpWindow, &msDialogLook, mpFontColours, mpTabbed, pFileMenu);
-		mpMenuBar->AddListener(&mpFileMenuListener);
+		mpMenuBar->GetItemClickEvent()->Add(&mpFileMenuListener, &CFileMenuListener::MenuItemClicked);
 		mpFileMenuListener->AddEditorTab("Editor", WINDOW_INPUT_TESTER_EDITOR_TEXT);
 
 		//Double clicking a tab other than Input renames it.
@@ -275,7 +275,7 @@ bool CWindowInputTesterApp::Run(void)
 		msDialogs.pcFileMenu = NULL;
 		msDialogs.pcTabNames = NULL;
 		mpTabbed->RemoveListener(&mpTabNameListener);
-		mpMenuBar->RemoveListener(&mpFileMenuListener);
+		mpMenuBar->GetItemClickEvent()->Remove(&mpFileMenuListener);
 		mpWindow->SetComponentInput(NULL);
 	}
 	return mbValid;

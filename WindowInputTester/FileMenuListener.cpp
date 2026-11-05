@@ -98,8 +98,6 @@ bool CFileMenuListener::Load(CObjectReader* pcFile)
 //////////////////////////////////////////////////////////////////////////
 void CFileMenuListener::Free(void)
 {
-	//An object's memory is freed without its destructor running so the listener takes itself off the menu bar.
-	RemoveFromListenerCalls();
 	mszLastFile.Kill();
 }
 
@@ -120,17 +118,17 @@ Ptr<CTabComponent> CFileMenuListener::AddEditorTab(const char* szName, const cha
 // Asks for the item's dialog, shown next tick.
 //
 //////////////////////////////////////////////////////////////////////////
-void CFileMenuListener::MenuItemClicked(CUnknown* pcSource, void* pvContext)
+void CFileMenuListener::MenuItemClicked(CMenuItem* pcItem)
 {
-	if (&mpNewEditorTab == pcSource)
+	if (&mpNewEditorTab == pcItem)
 	{
 		meDialog = FMD_NewEditorTab;
 	}
-	else if (&mpOpenFile == pcSource)
+	else if (&mpOpenFile == pcItem)
 	{
 		meDialog = FMD_OpenFile;
 	}
-	else if (&mpSaveFile == pcSource)
+	else if (&mpSaveFile == pcItem)
 	{
 		meDialog = FMD_SaveFile;
 	}

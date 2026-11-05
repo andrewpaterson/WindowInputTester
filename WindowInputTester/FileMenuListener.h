@@ -3,7 +3,6 @@
 #include "BaseLib/Chars.h"
 #include "SupportLib/FontColours.h"
 #include "WindowLib/MenuContainer.h"
-#include "WindowLib/MenuListener.h"
 #include "WindowLib/TabbedContainer.h"
 #include "WindowLib/Dialog.h"
 #include "WindowLib/FileChooser.h"
@@ -24,8 +23,9 @@ enum EFileMenuDialog
 //into a new editor tab named after the file, which is selected.  Save File asks for a file to save the selected editor
 //tab's text to, starting on the file it was last loaded from or saved to, and renames the tab after it; it does
 //nothing if the selected tab isn't an editor.
-//Clicking an item only asks for its dialog; the window's tick shows it with ShowDialog.
-class CFileMenuListener : public CObject, public CMenuListener
+//Clicking an item (MenuItemClicked, on the menu bar's item click event) only asks for its dialog; the window's tick
+//shows it with ShowDialog.
+class CFileMenuListener : public CObject
 {
 CONSTRUCTABLE(CFileMenuListener);
 DESTRUCTABLE(CFileMenuListener);
@@ -53,7 +53,7 @@ public:
 	bool					Load(CObjectReader* pcFile) override;
 
 	Ptr<CTabComponent>		AddEditorTab(const char* szName, const char* szText);
-	void					MenuItemClicked(CUnknown* pcSource, void* pvContext) override;
+	void					MenuItemClicked(CMenuItem* pcItem);
 	void					ShowDialog(void);
 
 protected:
