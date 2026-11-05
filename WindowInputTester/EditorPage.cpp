@@ -40,6 +40,22 @@ void CEditorPage::Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFont
 	AddComponent(pBackground);
 	AddComponent(pScroll);
 
+	mpInsertMenu = OMalloc<CMenuContainer>(pWindow, pTheme);
+	mpInsertMenu->AddItem("Hello");
+	mpInsertMenu->AddItem("World");
+	mpInsertMenu->AddItem("The quick brown fox");
+	mpMenu = OMalloc<CMenuContainer>(pWindow, pTheme);
+	mpCut = mpMenu->AddItem("Cut");
+	mpCopy = mpMenu->AddItem("Copy");
+	mpPaste = mpMenu->AddItem("Paste");
+	mpMenu->AddSeparator();
+	mpSelectAll = mpMenu->AddItem("Select All");
+	mpMenu->AddSeparator();
+	mpMenu->AddItem("Insert", NULL, mpInsertMenu);
+	mpMenu->GetItemClickEvent()->Add(this, &CEditorPage::MenuItemClicked);
+	mpInsertMenu->GetItemClickEvent()->Add(this, &CEditorPage::MenuItemClicked);
+	SetContextMenu(mpMenu);
+
 	PostInit();
 }
 
@@ -54,6 +70,12 @@ void CEditorPage::Class(void)
 
 	M_Pointer(mpTextArea);
 	U_String(mszFilename);
+	M_Pointer(mpMenu);
+	M_Pointer(mpCut);
+	M_Pointer(mpCopy);
+	M_Pointer(mpPaste);
+	M_Pointer(mpSelectAll);
+	M_Pointer(mpInsertMenu);
 }
 
 
@@ -63,6 +85,14 @@ void CEditorPage::Class(void)
 //////////////////////////////////////////////////////////////////////////
 void CEditorPage::Free(void)
 {
+	if (mpMenu.IsNotNull())
+	{
+		mpMenu->GetItemClickEvent()->Remove(this);
+	}
+	if (mpInsertMenu.IsNotNull())
+	{
+		mpInsertMenu->GetItemClickEvent()->Remove(this);
+	}
 	mszFilename.Kill();
 	CFillContainer::Free();
 }
@@ -132,6 +162,48 @@ Ptr<CTextArea> CEditorPage::GetTextArea(void)
 char* CEditorPage::GetFilename(void)
 {
 	return mszFilename.Text();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// An item in the context menu, or its Insert menu, was clicked.  The menu
+// has closed and the keys are back in the text area.  An Insert item's
+// text is typed at the caret.
+//
+//////////////////////////////////////////////////////////////////////////
+void CEditorPage::MenuItemClicked(CMenuItem* pcItem)
+{
+	if (&mpCut == pcItem)
+	{
+		mpTextArea->CutToClipboard();
+	}
+	else if (&mpCopy == pcItem)
+	{
+		mpTextArea->CopyToClipboard();
+	}
+	else if (&mpPaste == pcItem)
+	{
+		mpTextArea->PasteFromClipboard();
+	}
+	else if (&mpSelectAll == pcItem)
+	{
+		mpTextArea->SelectAll();
+	}
+	else
+	{
+		mpTextArea->Paste(pcItem->GetText());
+	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+Ptr<CMenuContainer> CEditorPage::GetMenu(void)
+{
+	return mpMenu;
 }
 
 
