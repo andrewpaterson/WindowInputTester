@@ -177,7 +177,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 
 		//Double clicking a tab other than Input renames it.
 		mpTabNameListener = OMalloc<CTabNameListener>(mpWindow, &msDialogLook, pInputTab);
-		mpTabbed->AddListener(&mpTabNameListener);
+		mpTabbed->GetDoubleClickEvent()->Add(&mpTabNameListener, &CTabNameListener::TabDoubleClicked);
 		msDialogs.pcFileMenu = &mpFileMenuListener;
 		msDialogs.pcTabNames = &mpTabNameListener;
 
@@ -274,7 +274,7 @@ bool CWindowInputTesterApp::Run(void)
 	{
 		msDialogs.pcFileMenu = NULL;
 		msDialogs.pcTabNames = NULL;
-		mpTabbed->RemoveListener(&mpTabNameListener);
+		mpTabbed->GetDoubleClickEvent()->Remove(&mpTabNameListener);
 		mpMenuBar->GetItemClickEvent()->Remove(&mpFileMenuListener);
 		mpWindow->SetComponentInput(NULL);
 	}

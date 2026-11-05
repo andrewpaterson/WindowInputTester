@@ -96,8 +96,6 @@ bool CTabNameListener::Load(CObjectReader* pcFile)
 //////////////////////////////////////////////////////////////////////////
 void CTabNameListener::Free(void)
 {
-	//An object's memory is freed without its destructor running so the listener takes itself off the tabs.
-	RemoveFromListenerCalls();
 }
 
 
@@ -106,11 +104,11 @@ void CTabNameListener::Free(void)
 // pcSource is the tab double clicked.  The Input tab keeps its name.
 //
 //////////////////////////////////////////////////////////////////////////
-void CTabNameListener::TabDoubleClicked(CUnknown* pcSource, void* pvContext)
+void CTabNameListener::TabDoubleClicked(CTabComponent* pcTab)
 {
-	if (&mpInputTab != pcSource)
+	if (&mpInputTab != pcTab)
 	{
-		mpRenameTab = (CTabComponent*)pcSource;
+		mpRenameTab = pcTab;
 	}
 }
 

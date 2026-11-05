@@ -6,8 +6,9 @@
 
 
 //Double clicking a tab other than the Input tab asks for its new name with AskTabName.  OK renames it.  The double
-//click only asks for the dialog; the window's tick shows it with ShowDialog.
-class CTabNameListener : public CObject, public CTabbedContainerListener
+//click (TabDoubleClicked, on the tabbed container's double click event) only asks for the dialog; the window's tick
+//shows it with ShowDialog.
+class CTabNameListener : public CObject
 {
 CONSTRUCTABLE(CTabNameListener);
 DESTRUCTABLE(CTabNameListener);
@@ -25,7 +26,7 @@ public:
 	bool	Save(CObjectWriter* pcFile) override;
 	bool	Load(CObjectReader* pcFile) override;
 
-	void	TabDoubleClicked(CUnknown* pcSource, void* pvContext) override;
+	void	TabDoubleClicked(CTabComponent* pcTab);
 	void	ShowDialog(void);
 };
 
