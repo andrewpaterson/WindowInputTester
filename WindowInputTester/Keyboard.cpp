@@ -208,7 +208,7 @@ void CKeyboard::Update(CComponentInput* pcInput)
 	Ptr<CKey>	pKey;
 	bool		bPressed;
 
-	for (i = 0; i < maKeys.Size(); i++)
+	for (i = 0; i < maKeys.NumElements(); i++)
 	{
 		pKey = maKeys.Get(i);
 		if (!StrEmpty(pKey->GetInputName()))
@@ -234,7 +234,7 @@ void CKeyboard::ReleaseAll(void)
 	size		i;
 	Ptr<CKey>	pKey;
 
-	for (i = 0; i < maKeys.Size(); i++)
+	for (i = 0; i < maKeys.NumElements(); i++)
 	{
 		pKey = maKeys.Get(i);
 		if (pKey->IsPressed())
@@ -251,7 +251,7 @@ void CKeyboard::ReleaseAll(void)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-size CKeyboard::NumKeys(void) { return maKeys.Size(); }
+size CKeyboard::NumKeys(void) { return maKeys.NumElements(); }
 Ptr<CKey> CKeyboard::GetKey(size uiIndex) { return maKeys.Get(uiIndex); }
 SFloat32Vec2 CKeyboard::GetSize(void) { return msSize; }
 int32 CKeyboard::GetChanges(void) { return miChanges; }
