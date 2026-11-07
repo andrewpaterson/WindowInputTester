@@ -1,3 +1,4 @@
+#include "BaseLib/FileUtil.h"
 #include "StandardLib/ClassDefines.h"
 #include "SupportLib/PNGWriter.h"
 #include "WindowLib/Window.h"
@@ -56,10 +57,13 @@ void CWindowInputTesterTick::Free(void)
 //////////////////////////////////////////////////////////////////////////
 void CWindowInputTesterTick::Tick(Ptr<CWindow> pWindow, int64 iUpdateTimeInMillieconds, int64 iTotalTimeInMillieconds)
 {
+	CFileUtil	cFileUtil;
+
 	if (miSnapshotTicks >= 0)
 	{
 		if (miSnapshotTicks == 0)
 		{
+			cFileUtil.TouchDir(WINDOW_INPUT_TESTER_SNAPSHOT_FILENAME, true);
 			SavePNG(pWindow->GetCanvas()->GetImageOrNull(), WINDOW_INPUT_TESTER_SNAPSHOT_FILENAME);
 		}
 		else
