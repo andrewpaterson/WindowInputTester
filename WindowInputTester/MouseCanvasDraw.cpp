@@ -5,7 +5,6 @@
 #include "SupportLib/ImageDraw.h"
 #include "SupportLib/VectorPath.h"
 #include "SupportLib/ImageColourConverter.h"
-#include "WindowLib/JewelColours.h"
 #include "WindowLib/Canvas.h"
 #include "WindowLib/Window.h"
 #include "MouseCanvasDraw.h"
@@ -30,13 +29,6 @@
 #define MOUSE_MOTION_HEAD		0.12	//The longest head, as a part of the width; a head is at most half its arrow.
 #define MOUSE_MOTION_HEAD_WIDTH	0.75	//Half the head's width, as a part of its length.
 #define MOUSE_MOTION_SHAFT		0.4		//Half the shaft's width, as a part of half the head's.
-#define MOUSE_BACKGROUND		JEWEL_EDITOR
-#define MOUSE_BORDER			JEWEL_BORDER
-#define MOUSE_FACE				JEWEL_PANEL
-#define MOUSE_PRESSED_BORDER	JEWEL_BLUE
-#define MOUSE_PRESSED_FACE		JEWEL_SELECTION
-#define MOUSE_ARROW				JEWEL_BORDER_HOVER
-#define MOUSE_ROLLED_ARROW		JEWEL_BLUE_HOVER
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -53,9 +45,17 @@ static void SetMouseColour(CImageColourARGB* pcColour, ARGB32 sColour)
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CMouseCanvasDraw::Init(Ptr<CMouse> pMouse)
+void CMouseCanvasDraw::Init(Ptr<CMouse> pMouse, Ptr<CWindowTheme> pTheme)
 {
 	PreInit();
+
+	msBackground = pTheme->GetColour(TC_Editor);
+	msBorder = pTheme->GetColour(TC_Border);
+	msFace = pTheme->GetColour(TC_Panel);
+	msPressedBorder = pTheme->GetColour(TC_Accent);
+	msPressedFace = pTheme->GetColour(TC_ListSelected);
+	msArrow = pTheme->GetColour(TC_BorderHover);
+	msRolledArrow = pTheme->GetColour(TC_AccentHover);
 
 	CCanvasDraw::Init();
 	mpCelDraw = OMalloc<CImageCanvasDraw>(Ptr<CImageCel>(), false);
@@ -74,6 +74,13 @@ void CMouseCanvasDraw::Init(Ptr<CMouse> pMouse)
 //////////////////////////////////////////////////////////////////////////
 void CMouseCanvasDraw::Class(void)
 {
+	U_UInt32(msBackground);
+	U_UInt32(msBorder);
+	U_UInt32(msFace);
+	U_UInt32(msPressedBorder);
+	U_UInt32(msPressedFace);
+	U_UInt32(msArrow);
+	U_UInt32(msRolledArrow);
 	CCanvasDraw::Class();
 	M_Pointer(mpCelDraw);
 	M_Pointer(mpMouse);
@@ -198,13 +205,13 @@ void CMouseCanvasDraw::MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iSt
 	pImage = OMalloc<CImage>(sSize.x, sSize.y, PT_uint8, IMAGE_DIFFUSE_RED, IMAGE_DIFFUSE_GREEN, IMAGE_DIFFUSE_BLUE, IMAGE_OPACITY, CHANNEL_STOP);
 	pImage->Black();
 
-	SetMouseColour(&cBackground, MOUSE_BACKGROUND);
-	SetMouseColour(&cBorder, MOUSE_BORDER);
-	SetMouseColour(&cFace, MOUSE_FACE);
-	SetMouseColour(&cPressedBorder, MOUSE_PRESSED_BORDER);
-	SetMouseColour(&cPressedFace, MOUSE_PRESSED_FACE);
-	SetMouseColour(&cArrow, MOUSE_ARROW);
-	SetMouseColour(&cRolledArrow, MOUSE_ROLLED_ARROW);
+	SetMouseColour(&cBackground, msBackground);
+	SetMouseColour(&cBorder, msBorder);
+	SetMouseColour(&cFace, msFace);
+	SetMouseColour(&cPressedBorder, msPressedBorder);
+	SetMouseColour(&cPressedFace, msPressedFace);
+	SetMouseColour(&cArrow, msArrow);
+	SetMouseColour(&cRolledArrow, msRolledArrow);
 
 	cDraw.Init(&pImage);
 	cDraw.SetColour(&cBackground);

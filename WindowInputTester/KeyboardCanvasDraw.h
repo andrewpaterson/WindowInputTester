@@ -7,6 +7,7 @@
 #include "SupportLib/GlyphListFontDraw.h"
 #include "WindowLib/ImageCanvasDraw.h"
 #include "Keyboard.h"
+#include "WindowLib/WindowTheme.h"
 
 
 class CImageDraw;
@@ -21,6 +22,12 @@ class CKeyboardCanvasDraw : public CCanvasDraw
 CONSTRUCTABLE(CKeyboardCanvasDraw);
 DESTRUCTABLE(CKeyboardCanvasDraw);
 protected:
+	ARGB32						msBackground;
+	ARGB32						msKeyBorder;
+	ARGB32						msKeyFace;
+	ARGB32						msKeyLegend;
+	ARGB32						msPressedBorder;
+	ARGB32						msPressedFace;
 	Ptr<CImageCanvasDraw>		mpCelDraw;
 	Ptr<CKeyboard>				mpKeyboard;
 	Ptr<CFont>					mpFont;
@@ -30,7 +37,7 @@ protected:
 	int32						miCelChanges;  //The keyboard's changes when the cel was made.
 
 public:
-	void		Init(Ptr<CKeyboard> pKeyboard, Ptr<CFont> pFont);
+	void		Init(Ptr<CKeyboard> pKeyboard, Ptr<CFont> pFont, Ptr<CWindowTheme> pTheme);
 	void		Class(void) override;
 	void 		Free(void) override;
 	bool		Save(CObjectWriter* pcFile) override;

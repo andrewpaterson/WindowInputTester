@@ -2,6 +2,7 @@
 #define __MOUSE_CANVAS_DRAW_H__
 #include "WindowLib/ImageCanvasDraw.h"
 #include "Mouse.h"
+#include "WindowLib/WindowTheme.h"
 
 
 class CImageDraw;
@@ -25,6 +26,13 @@ class CMouseCanvasDraw : public CCanvasDraw
 CONSTRUCTABLE(CMouseCanvasDraw);
 DESTRUCTABLE(CMouseCanvasDraw);
 protected:
+	ARGB32					msBackground;
+	ARGB32					msBorder;
+	ARGB32					msFace;
+	ARGB32					msPressedBorder;
+	ARGB32					msPressedFace;
+	ARGB32					msArrow;
+	ARGB32					msRolledArrow;
 	Ptr<CImageCanvasDraw>	mpCelDraw;
 	Ptr<CMouse>				mpMouse;
 	SInt32Vec2				msCelSize;  //The canvas size the cel was made for, -1, -1 for none yet.
@@ -32,7 +40,7 @@ protected:
 	SInt32Vec2				msCelArrow;  //The motion arrow the cel was made with, in pixels, 0, 0 for none.
 
 public:
-	void	Init(Ptr<CMouse> pMouse);
+	void	Init(Ptr<CMouse> pMouse, Ptr<CWindowTheme> pTheme);
 	void	Class(void) override;
 	void 	Free(void) override;
 	bool	Save(CObjectWriter* pcFile) override;
@@ -41,13 +49,13 @@ public:
 	bool	Draw(Ptr<CCanvas> pCanvas) override;
 
 protected:
-	void	MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iState, SInt32Vec2 sArrow);
-	bool	GetBody(SInt32Vec2 sSize, float64* pfLeft, float64* pfTop, float64* pfRight, float64* pfBottom);
-	void	GetMotionArea(float64 fLeft, float64 fTop, float64 fRight, float64 fBottom, float64* pfCentreX, float64* pfCentreY, float64* pfMaxLength);
+	void		MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iState, SInt32Vec2 sArrow);
+	bool		GetBody(SInt32Vec2 sSize, float64* pfLeft, float64* pfTop, float64* pfRight, float64* pfBottom);
+	void		GetMotionArea(float64 fLeft, float64 fTop, float64 fRight, float64 fBottom, float64* pfCentreX, float64* pfCentreY, float64* pfMaxLength);
 	SInt32Vec2	GetArrow(SInt32Vec2 sSize);
-	void	DrawMotion(CImageDraw* pcDraw, float64 fCentreX, float64 fCentreY, SInt32Vec2 sArrow, float64 fWidth, CImageColourARGB* pcBorder, CImageColourARGB* pcFace);
-	void	DrawButton(CImageDraw* pcDraw, float64 fLeft, float64 fTop, float64 fRight, float64 fBottom, float64 fRadius, bool bLeft, CImageColourARGB* pcBorder, CImageColourARGB* pcFace);
-	void	DrawArrow(CImageDraw* pcDraw, float64 fCentreX, float64 fCentreY, float64 fWidth, bool bUp);
+	void		DrawMotion(CImageDraw* pcDraw, float64 fCentreX, float64 fCentreY, SInt32Vec2 sArrow, float64 fWidth, CImageColourARGB* pcBorder, CImageColourARGB* pcFace);
+	void		DrawButton(CImageDraw* pcDraw, float64 fLeft, float64 fTop, float64 fRight, float64 fBottom, float64 fRadius, bool bLeft, CImageColourARGB* pcBorder, CImageColourARGB* pcFace);
+	void		DrawArrow(CImageDraw* pcDraw, float64 fCentreX, float64 fCentreY, float64 fWidth, bool bUp);
 };
 
 

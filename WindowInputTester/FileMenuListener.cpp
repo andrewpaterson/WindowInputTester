@@ -4,7 +4,6 @@
 #include "StandardLib/ObjectWriter.h"
 #include "WindowLib/FileChooser.h"
 #include "WindowLib/JewelImageGenerator.h"
-#include "WindowLib/JewelColours.h"
 #include "TabNameListener.h"
 #include "FileMenuListener.h"
 
@@ -37,8 +36,8 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	meDialog = FMD_None;
 
 	pWindow->GetColourFormat(&cFormat);
-	mpFolderIcon = CJewelImageGenerator::CreateFolder(JEWEL_ICON, &cFormat);
-	mpFileIcon = CJewelImageGenerator::CreateFile(JEWEL_ICON, &cFormat);
+	mpFolderIcon = CJewelImageGenerator::CreateFolder(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
+	mpFileIcon = CJewelImageGenerator::CreateFile(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
 
 	mpNewEditorTab = pFileMenu->AddItem("New...");
 	mpOpenFile = pFileMenu->AddItem("Load...", mpFileIcon);

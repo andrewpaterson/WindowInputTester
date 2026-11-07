@@ -11,7 +11,6 @@
 #include "WindowLib/ClearCanvasDraw.h"
 #include "WindowLib/GridContainer.h"
 #include "WindowLib/Canvas.h"
-#include "WindowLib/JewelColours.h"
 #include "WindowLib/JewelTheme.h"
 #include "WindowLib/JewelImageGenerator.h"
 #include "Keyboard.h"
@@ -130,8 +129,10 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 	Ptr<CKeyboard>			pKeyboard;
 	Ptr<CMouse>				pMouse;
 	CColourFormatHelper		cFormat;
+	Ptr<CClearCanvasDraw>	pBackground;
 
-	mpWindow = OMalloc<CWindow>("Window Input Tester", pcNativeFactory, OMalloc<CWindowInputTesterTick>(&msDialogs), OMalloc<CClearCanvasDraw>(JEWEL_PANEL), CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
+	pBackground = OMalloc<CClearCanvasDraw>(0);  //Coloured once there is a theme.
+	mpWindow = OMalloc<CWindow>("Window Input Tester", pcNativeFactory, OMalloc<CWindowInputTesterTick>(&msDialogs), pBackground, CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
 
 	//The font is white and coloured as it is drawn.
 	pWhite = GenerateFont("Resources/InterVariable.ttf", "Inter 13px", 13.0f, mpWindow->GetColourOrder());
@@ -139,9 +140,10 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 	if (mbValid)
 	{
 		mpFontColours = OMalloc<CFontColours>(pWhite);
-		mpTheme = CJewelTheme::CreateDarkTheme(mpWindow, mpFontColours->GetFont(JEWEL_TEXT));
+		mpTheme = CJewelTheme::CreateDarkTheme(mpWindow, mpFontColours);
+		pBackground->SetColour(mpTheme->GetColour(TC_Panel));
 		msDialogLook.pcTheme = &mpTheme;
-		msDialogLook.pcDimFont = &mpFontColours->GetFont(JEWEL_ICON);
+		msDialogLook.pcDimFont = &mpFontColours->GetFont(mpTheme->GetColour(TC_Icon));
 		mpTabbed = OMalloc<CTabbedContainer>(mpWindow, mpTheme);
 		mpTabbed->SetAlignment(CSH_Stretch, CSV_Stretch);
 
@@ -161,10 +163,10 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		pGrid->SetAlignment(CSH_Stretch, CSV_Stretch);
 		pGrid->SetCanGetFocus(true);
 		pMouse = OMalloc<CMouse>();
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CMouseCanvasDraw>(pMouse)), 0, 0, 1, 1, 1, 1);
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR)), 1, 0, 1, 1, 1, 1);
+		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CMouseCanvasDraw>(pMouse, mpTheme)), 0, 0, 1, 1, 1, 1);
+		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CClearCanvasDraw>(mpTheme->GetColour(TC_Editor))), 1, 0, 1, 1, 1, 1);
 		pKeyboard = OMalloc<CKeyboard>();
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, mpFontColours->GetFont(JEWEL_TEXT))), 0, 1, 2, 1, 1, 1);
+		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, mpTheme->GetFont(), mpTheme)), 0, 1, 2, 1, 1, 1);
 
 		//The keyboard and the mouse's buttons read the devices as they are drawn.  The wheel's rolls and the mouse's
 		//movement are only events, which go from the focussed component (the one under the pointer for movement) up to
@@ -172,7 +174,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pMouse, &CMouse::KeyAction);
 		pMain->AddInputAction(IAF_Movement, NULL, &pMouse, &CMouse::MovementAction);
 		mpWindow->GetColourFormat(&cFormat);
-		pInputTab = mpTabbed->AddTab("Input", pGrid, CJewelImageGenerator::CreateKeyboard(JEWEL_ICON, &cFormat));
+		pInputTab = mpTabbed->AddTab("Input", pGrid, CJewelImageGenerator::CreateKeyboard(mpTheme->GetColour(TC_Icon), &cFormat));
 		mpFileMenuListener = OMalloc<CFileMenuListener>(mpWindow, &msDialogLook, mpFontColours, mpTabbed, pFileMenu);
 		mpMenuBar->GetItemClickEvent()->Add(&mpFileMenuListener, &CFileMenuListener::MenuItemClicked);
 		mpFileMenuListener->AddEditorTab("Editor", WINDOW_INPUT_TESTER_EDITOR_TEXT);

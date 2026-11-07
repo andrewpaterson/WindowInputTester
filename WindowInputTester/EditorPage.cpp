@@ -5,7 +5,6 @@
 #include "WindowLib/Canvas.h"
 #include "WindowLib/ClearCanvasDraw.h"
 #include "WindowLib/ScrollPane.h"
-#include "WindowLib/JewelColours.h"
 #include "EditorPage.h"
 
 
@@ -25,7 +24,7 @@ void CEditorPage::Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFont
 	mszFilename.Init();
 
 	mpTextArea = OMalloc<CTextArea>(pWindow, pTheme, pFontColours, szText);
-	mpTextArea->SetColour(JEWEL_TEXT);
+	mpTextArea->SetColour(pTheme->GetColour(TC_Text));
 	mpTextArea->SetWordWrap(true);
 	mpTextArea->SetAlignment(CSH_Stretch, CSV_Stretch);
 
@@ -34,7 +33,7 @@ void CEditorPage::Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFont
 	pScroll->SetPolicy(SBO_Horizontal, SPP_Never);
 	pScroll->SetContent(mpTextArea);
 
-	pBackground = OMalloc<CCanvas>(pWindow, OMalloc<CClearCanvasDraw>(JEWEL_EDITOR));
+	pBackground = OMalloc<CCanvas>(pWindow, OMalloc<CClearCanvasDraw>(pTheme->GetColour(TC_Editor)));
 	pBackground->SetAlignment(CSH_Stretch, CSV_Stretch);
 	AddComponent(pBackground);
 	AddComponent(pScroll);
