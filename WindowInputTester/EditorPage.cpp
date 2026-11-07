@@ -26,7 +26,7 @@ void CEditorPage::Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFont
 
 	mpTextArea = OMalloc<CTextArea>(pWindow, pFontColours, szText);
 	mpTextArea->SetColour(JEWEL_TEXT);
-	mpTextArea->SetMarkColours(pTheme->GetTextSelectionColour(), pTheme->GetCaretColour());
+	mpTextArea->SetMarkColours(pTheme->GetColour(TC_TextSelection), pTheme->GetColour(TC_Caret));
 	mpTextArea->SetWordWrap(true);
 	mpTextArea->SetAlignment(CSH_Stretch, CSV_Stretch);
 
