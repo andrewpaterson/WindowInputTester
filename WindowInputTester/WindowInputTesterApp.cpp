@@ -128,11 +128,18 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 	Ptr<CTabComponent>		pInputTab;
 	Ptr<CKeyboard>			pKeyboard;
 	Ptr<CMouse>				pMouse;
+	Ptr<CCanvas>			pMouseCanvas;
+	Ptr<CCanvas>			pKeyboardCanvas;
 	CColourFormatHelper		cFormat;
 	Ptr<CClearCanvasDraw>	pBackground;
 
 	pBackground = OMalloc<CClearCanvasDraw>(0);  //Coloured once there is a theme.
 	mpWindow = OMalloc<CWindow>("Window Input Tester", pcNativeFactory, OMalloc<CWindowInputTesterTick>(&msDialogs), pBackground, CFT_RGBX, CCO_BGR, CRGB_24bit, ARGB_8bit);
+
+	//Only what changed is drawn.  WINDOW_INPUT_TESTER_VERIFY_REDRAW checks every partial paint against drawing all of the
+	//window and logs where they differ.
+	mpWindow->SetPartialRedraw(true);
+	mpWindow->SetVerifyRedraw(getenv("WINDOW_INPUT_TESTER_VERIFY_REDRAW") != NULL);
 
 	//The font is white and coloured as it is drawn.
 	pWhite = GenerateFont("Resources/InterVariable.ttf", "Inter 13px", 13.0f, mpWindow->GetColourOrder());
@@ -163,10 +170,16 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		pGrid->SetAlignment(CSH_Stretch, CSV_Stretch);
 		pGrid->SetCanGetFocus(true);
 		pMouse = OMalloc<CMouse>();
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CMouseCanvasDraw>(pMouse, mpTheme)), 0, 0, 1, 1, 1, 1);
+		pMouseCanvas = CreateCanvas(mpWindow, OMalloc<CMouseCanvasDraw>(pMouse, mpTheme));
+		pGrid->AddComponent(pMouseCanvas, 0, 0, 1, 1, 1, 1);
 		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CClearCanvasDraw>(mpTheme->GetColour(TC_Editor))), 1, 0, 1, 1, 1, 1);
 		pKeyboard = OMalloc<CKeyboard>();
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, mpTheme->GetFont(), mpTheme)), 0, 1, 2, 1, 1, 1);
+		pKeyboardCanvas = CreateCanvas(mpWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, mpTheme->GetFont(), mpTheme));
+		pGrid->AddComponent(pKeyboardCanvas, 0, 1, 2, 1, 1, 1);
+
+		//They draw every paint, so they show the devices as they are.
+		pMouseCanvas->SetDrawnEveryPaint(true);
+		pKeyboardCanvas->SetDrawnEveryPaint(true);
 
 		//The keyboard and the mouse's buttons read the devices as they are drawn.  The wheel's rolls and the mouse's
 		//movement are only events, which go from the focussed component (the one under the pointer for movement) up to
