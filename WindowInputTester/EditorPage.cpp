@@ -24,9 +24,8 @@ void CEditorPage::Init(Ptr<CWindow> pWindow, Ptr<CWindowTheme> pTheme, Ptr<CFont
 	SetAlignment(CSH_Stretch, CSV_Stretch);
 	mszFilename.Init();
 
-	mpTextArea = OMalloc<CTextArea>(pWindow, pFontColours, szText);
+	mpTextArea = OMalloc<CTextArea>(pWindow, pTheme, pFontColours, szText);
 	mpTextArea->SetColour(JEWEL_TEXT);
-	mpTextArea->SetMarkColours(pTheme->GetColour(TC_TextSelection), pTheme->GetColour(TC_Caret));
 	mpTextArea->SetWordWrap(true);
 	mpTextArea->SetAlignment(CSH_Stretch, CSV_Stretch);
 
