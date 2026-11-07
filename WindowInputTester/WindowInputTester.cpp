@@ -1,10 +1,5 @@
 #include <windows.h>
-#include "BaseLib/Logger.h"
-#include "BaseLib/TypeNames.h"
-#include "BaseLib/TypeConverter.h"
 #include "BaseLib/GlobalMemory.h"
-#include "BaseLib/GlobalDataTypesIO.h"
-#include "StandardLib/Objects.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterApp.h"
@@ -16,70 +11,29 @@
 //////////////////////////////////////////////////////////////////////////
 int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
+	bool	bResult;
+
 	_CrtSetBreakAlloc(0);
-
-	gcLogger.Init();
-	TypesInit();
-	TypeConverterInit();
-	MemoryInit();
-	DataIOInit();
-	ObjectsInit();
-
-	bool bResult;
-
-	bResult = true;
+	InitWindowInputTesterGlobals();
 
 	{
-		CWinGDIWindowFactory			cNativeFactory;
-		CWinInput						cWinInput;
-		Ptr<CWindowInputTesterApp>		pApp;
+		CWinGDIWindowFactory	cNativeFactory;
+		CWinInput				cWinInput;
 
-		cNativeFactory.Init(&gcMemoryAllocator,
-			hInstance,
-			hPrevInstance,
-			nCmdShow,
-			"WindowInputTester");
-
-		//Validating every object each time one changes is too slow for the text's glyphs.  They are validated once at the end.
-		gcObjects.DisableValidation();
+		cNativeFactory.Init(&gcMemoryAllocator, hInstance, hPrevInstance, nCmdShow, "WindowInputTester");
 
 		//The app's input reads the devices from the XML, then adds these.
 		cWinInput.Init(NULL, false);
 		cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
-		//The app (its window, listeners and input) is held by the root while it runs.
-		pApp = OMalloc<CWindowInputTesterApp>();
-		ORoot()->Add(pApp);
-		bResult = pApp->Setup(&cNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml") && pApp->Run();
-		ORoot()->Remove(pApp);
-		pApp = NULL;
+		bResult = RunWindowInputTesterApp(&cNativeFactory, &cWinInput, "../../commonlibraries/Libraries/WinInputLib/xml");
 
 		cNativeFactory.SetRawInput(NULL, NULL);
 		cWinInput.Kill();
-
-		gcObjects.EnableValidation();
-		gcObjects.ValidateObjectsConsistency();
-
 		cNativeFactory.Kill();
 	}
 
-	ObjectsFlush();
-	ObjectsKill();
-	DataIOKill();
-	MemoryKill();
-	TypeConverterKill();
-	TypesKill();
-
-	gcLogger.Kill();
-
+	KillWindowInputTesterGlobals();
 	_CrtDumpMemoryLeaks();
-
-	if (bResult)
-	{
-		return 0;
-	}
-	else
-	{
-		return 1;
-	}
+	return bResult ? 0 : 1;
 }

@@ -1,4 +1,8 @@
 #include "BaseLib/Logger.h"
+#include "BaseLib/TypeNames.h"
+#include "BaseLib/TypeConverter.h"
+#include "BaseLib/GlobalMemory.h"
+#include "BaseLib/GlobalDataTypesIO.h"
 #include "StandardLib/Objects.h"
 #include "SupportLib/ImageColour.h"
 #include "SupportLib/ImageColourConverter.h"
@@ -279,4 +283,64 @@ bool CWindowInputTesterApp::Run(void)
 		mpWindow->SetComponentInput(NULL);
 	}
 	return mbValid;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// What every Codaphela program sets up before it makes objects, and
+// takes down after.
+//
+//////////////////////////////////////////////////////////////////////////
+void InitWindowInputTesterGlobals(void)
+{
+	gcLogger.Init();
+	TypesInit();
+	TypeConverterInit();
+	MemoryInit();
+	DataIOInit();
+	ObjectsInit();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+//
+//////////////////////////////////////////////////////////////////////////
+void KillWindowInputTesterGlobals(void)
+{
+	ObjectsFlush();
+	ObjectsKill();
+	DataIOKill();
+	MemoryKill();
+	TypeConverterKill();
+	TypesKill();
+	gcLogger.Kill();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The app (its window, listeners and input) is held by the root while it
+// runs on the host's window factory and input.  szInputDirectory has
+// WinInputLib's XML device descriptions.
+//
+//////////////////////////////////////////////////////////////////////////
+bool RunWindowInputTesterApp(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory)
+{
+	Ptr<CWindowInputTesterApp>	pApp;
+	bool						bResult;
+
+	//Validating every object each time one changes is too slow for the text's glyphs.  They are validated once at the end.
+	gcObjects.DisableValidation();
+
+	pApp = OMalloc<CWindowInputTesterApp>();
+	ORoot()->Add(pApp);
+	bResult = pApp->Setup(pcNativeFactory, pcNativeInput, szInputDirectory) && pApp->Run();
+	ORoot()->Remove(pApp);
+	pApp = NULL;
+
+	gcObjects.EnableValidation();
+	gcObjects.ValidateObjectsConsistency();
+	return bResult;
 }

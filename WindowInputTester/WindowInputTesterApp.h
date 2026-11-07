@@ -53,5 +53,10 @@ public:
 };
 
 
+void	InitWindowInputTesterGlobals(void);
+void	KillWindowInputTesterGlobals(void);
+bool	RunWindowInputTesterApp(CNativeWindowFactory* pcNativeFactory, CNativeInput* pcNativeInput, const char* szInputDirectory);
+
+
 #endif // __WINDOW_INPUT_TESTER_APP_H__
 
