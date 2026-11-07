@@ -142,8 +142,6 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		mpTheme = CJewelTheme::CreateDarkTheme(mpWindow, mpFontColours->GetFont(JEWEL_TEXT));
 		msDialogLook.pcTheme = &mpTheme;
 		msDialogLook.pcDimFont = &mpFontColours->GetFont(JEWEL_ICON);
-		msDialogLook.sBackground = JEWEL_PANEL;
-		msDialogLook.sDivider = JEWEL_SEPARATOR;
 		mpTabbed = OMalloc<CTabbedContainer>(mpWindow, mpTheme);
 		mpTabbed->SetAlignment(CSH_Stretch, CSV_Stretch);
 
