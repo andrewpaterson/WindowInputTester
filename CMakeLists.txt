@@ -1,4 +1,4 @@
-# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + InputLib + WindowLib + X11Lib + the
+# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + InputLib + WindowLib + X11Lib + the
 # tester's sources).
 #
 # 64-bit only: there is no 32-bit libX11 installed.  Needs libx11-dev and libxext-dev.
@@ -33,6 +33,7 @@ set(COMMON_DIR "${CODAPHELA_ROOT}/commonlibraries/Libraries")
 set(BASELIB_DIR "${COMMON_DIR}/BaseLib")
 set(STANDARDLIB_DIR "${COMMON_DIR}/StandardLib")
 set(SUPPORTLIB_DIR "${COMMON_DIR}/SupportLib")
+set(RASTERLIB_DIR "${COMMON_DIR}/RasterLib")
 set(INPUTLIB_DIR "${COMMON_DIR}/InputLib")
 set(WINDOWLIB_DIR "${COMMON_DIR}/WindowLib")
 set(X11LIB_DIR "${COMMON_DIR}/X11Lib")
@@ -84,6 +85,7 @@ endfunction()
 vcxproj_sources(BASELIB_SOURCES "${BASELIB_DIR}/BaseLib.vcxproj")
 vcxproj_sources(STANDARDLIB_SOURCES "${STANDARDLIB_DIR}/StandardLib.vcxproj")
 vcxproj_sources(SUPPORTLIB_SOURCES "${SUPPORTLIB_DIR}/SupportLib.vcxproj")
+vcxproj_sources(RASTERLIB_SOURCES "${RASTERLIB_DIR}/RasterLib.vcxproj")
 vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
 vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
@@ -135,6 +137,9 @@ target_link_libraries(StandardLib PUBLIC BaseLib)
 add_library(SupportLib STATIC ${SUPPORTLIB_SOURCES})
 target_link_libraries(SupportLib PUBLIC StandardLib BaseLib)
 
+add_library(RasterLib STATIC ${RASTERLIB_SOURCES})
+target_link_libraries(RasterLib PUBLIC SupportLib StandardLib BaseLib)
+
 add_library(InputLib STATIC ${INPUTLIB_SOURCES})
 target_link_libraries(InputLib PUBLIC StandardLib BaseLib)
 
@@ -146,4 +151,4 @@ target_link_libraries(X11Lib PUBLIC WindowLib InputLib SupportLib StandardLib Ba
 
 add_executable(WindowInputTester ${TESTER_SOURCES})
 target_include_directories(WindowInputTester PRIVATE "${TESTER_DIR}")
-target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib SupportLib StandardLib BaseLib)
+target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib RasterLib SupportLib StandardLib BaseLib)

@@ -5,6 +5,7 @@
 
 class CFileMenuListener;
 class CTabNameListener;
+class CVRMLPage;
 
 
 //Dialogs are shown from the window's tick, not from the listener of the menu item or tab that asked for them, because
@@ -13,6 +14,7 @@ struct SWindowInputTesterDialogs
 {
 	CFileMenuListener*	pcFileMenu;
 	CTabNameListener*	pcTabNames;
+	CVRMLPage*			pcVRMLPage;
 };
 
 

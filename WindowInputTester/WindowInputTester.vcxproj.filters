@@ -19,6 +19,12 @@
     <ClCompile Include="EditorPage.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="VRMLCanvasDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="VRMLPage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="Key.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -58,6 +64,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="EditorPage.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="VRMLCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="VRMLPage.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Key.h">

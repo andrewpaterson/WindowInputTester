@@ -103,6 +103,7 @@ void CWindowInputTesterApp::Init(void)
 	memset(&msDialogLook, 0, sizeof(SDialogLook));
 	msDialogs.pcFileMenu = NULL;
 	msDialogs.pcTabNames = NULL;
+	msDialogs.pcVRMLPage = NULL;
 	mbValid = false;
 	mbInputs = false;
 
@@ -126,6 +127,8 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 	Ptr<CGridContainer>		pGrid;
 	Ptr<CMenuContainer>		pFileMenu;
 	Ptr<CTabComponent>		pInputTab;
+	Ptr<CTabComponent>		pVRMLTab;
+	char*					szVRMLFile;
 	Ptr<CKeyboard>			pKeyboard;
 	Ptr<CMouse>				pMouse;
 	Ptr<CCanvas>			pMouseCanvas;
@@ -191,12 +194,15 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		mpFileMenuListener = OMalloc<CFileMenuListener>(mpWindow, &msDialogLook, mpFontColours, mpTabbed, pFileMenu);
 		mpMenuBar->GetItemClickEvent()->Add(&mpFileMenuListener, &CFileMenuListener::MenuItemClicked);
 		mpFileMenuListener->AddEditorTab("Editor", WINDOW_INPUT_TESTER_EDITOR_TEXT);
+		mpVRMLPage = OMalloc<CVRMLPage>(mpWindow, &msDialogLook, mpFontColours);
+		pVRMLTab = mpTabbed->AddTab("VRML", mpVRMLPage);
 
 		//Double clicking a tab other than Input renames it.
 		mpTabNameListener = OMalloc<CTabNameListener>(mpWindow, &msDialogLook, pInputTab);
 		mpTabbed->GetDoubleClickEvent()->Add(&mpTabNameListener, &CTabNameListener::TabDoubleClicked);
 		msDialogs.pcFileMenu = &mpFileMenuListener;
 		msDialogs.pcTabNames = &mpTabNameListener;
+		msDialogs.pcVRMLPage = &mpVRMLPage;
 
 		mpInput = OMalloc<CInput>((CNativeInput*)NULL);
 		mbValid = mpInput->Read((char*)szInputDirectory);
@@ -210,6 +216,14 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 
 		mpWindow->GetFocus()->SetFocus(pGrid);
 		mpWindow->SetWindowSize(1280, 800);
+
+		//WINDOW_INPUT_TESTER_VRML starts on the VRML tab with that file loaded, to check how it draws without clicking.
+		szVRMLFile = getenv("WINDOW_INPUT_TESTER_VRML");
+		if (szVRMLFile != NULL)
+		{
+			mpTabbed->Select(pVRMLTab);
+			mpVRMLPage->LoadVRML(szVRMLFile);
+		}
 	}
 	return mbValid;
 }
@@ -228,6 +242,7 @@ void CWindowInputTesterApp::Class(void)
 	M_Pointer(mpMenuBar);
 	M_Pointer(mpFileMenuListener);
 	M_Pointer(mpTabNameListener);
+	M_Pointer(mpVRMLPage);
 	U_Data(SDialogLook, msDialogLook);
 	U_Data(SWindowInputTesterDialogs, msDialogs);
 	M_Pointer(mpInput);
@@ -291,6 +306,7 @@ bool CWindowInputTesterApp::Run(void)
 	{
 		msDialogs.pcFileMenu = NULL;
 		msDialogs.pcTabNames = NULL;
+		msDialogs.pcVRMLPage = NULL;
 		mpTabbed->GetDoubleClickEvent()->Remove(&mpTabNameListener);
 		mpMenuBar->GetItemClickEvent()->Remove(&mpFileMenuListener);
 		mpWindow->SetComponentInput(NULL);

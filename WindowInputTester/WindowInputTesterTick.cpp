@@ -4,6 +4,7 @@
 #include "WindowLib/Window.h"
 #include "FileMenuListener.h"
 #include "TabNameListener.h"
+#include "VRMLPage.h"
 #include "WindowInputTesterTick.h"
 
 
@@ -82,5 +83,9 @@ void CWindowInputTesterTick::Tick(Ptr<CWindow> pWindow, int64 iUpdateTimeInMilli
 	if (mpsDialogs->pcTabNames)
 	{
 		mpsDialogs->pcTabNames->ShowDialog();
+	}
+	if (mpsDialogs->pcVRMLPage)
+	{
+		mpsDialogs->pcVRMLPage->ShowDialog();
 	}
 }
