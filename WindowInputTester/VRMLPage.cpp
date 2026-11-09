@@ -154,12 +154,12 @@ bool CVRMLPage::LoadVRML(const char* szFilename)
 	bool		bResult;
 
 	szName.Init();
-	cFileUtil.GetFileName(&szName, (char*)szFilename);
+	cFileUtil.GetFileName(&szName, szFilename);
 	szStatus.Init(szName.Text());
 
 	iStart = GetDebugTickCount();
 	pMesh = OMalloc<CMesh>();
-	bResult = ReadMesh(pMesh, (char*)szFilename, MT_VRML);
+	bResult = ReadMesh(pMesh, szFilename, MT_VRML);
 	if (bResult)
 	{
 		mpDraw->SetMesh(&pMesh);
