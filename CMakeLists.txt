@@ -1,4 +1,4 @@
-# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RasterRenderLib + InputLib + WindowLib + X11Lib + the
+# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RenderLib + RasterRenderLib + InputLib + WindowLib + X11Lib + the
 # tester's sources).
 #
 # 64-bit only: there is no 32-bit libX11 installed.  Needs libx11-dev and libxext-dev.
@@ -34,6 +34,7 @@ set(BASELIB_DIR "${COMMON_DIR}/BaseLib")
 set(STANDARDLIB_DIR "${COMMON_DIR}/StandardLib")
 set(SUPPORTLIB_DIR "${COMMON_DIR}/SupportLib")
 set(RASTERLIB_DIR "${COMMON_DIR}/RasterLib")
+set(RENDERLIB_DIR "${COMMON_DIR}/RenderLib")
 set(RASTERRENDERLIB_DIR "${COMMON_DIR}/RasterRenderLib")
 set(INPUTLIB_DIR "${COMMON_DIR}/InputLib")
 set(WINDOWLIB_DIR "${COMMON_DIR}/WindowLib")
@@ -87,6 +88,7 @@ vcxproj_sources(BASELIB_SOURCES "${BASELIB_DIR}/BaseLib.vcxproj")
 vcxproj_sources(STANDARDLIB_SOURCES "${STANDARDLIB_DIR}/StandardLib.vcxproj")
 vcxproj_sources(SUPPORTLIB_SOURCES "${SUPPORTLIB_DIR}/SupportLib.vcxproj")
 vcxproj_sources(RASTERLIB_SOURCES "${RASTERLIB_DIR}/RasterLib.vcxproj")
+vcxproj_sources(RENDERLIB_SOURCES "${RENDERLIB_DIR}/RenderLib.vcxproj")
 vcxproj_sources(RASTERRENDERLIB_SOURCES "${RASTERRENDERLIB_DIR}/RasterRenderLib.vcxproj")
 vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
@@ -145,8 +147,11 @@ target_link_libraries(SupportLib PUBLIC StandardLib BaseLib)
 add_library(RasterLib STATIC ${RASTERLIB_SOURCES})
 target_link_libraries(RasterLib PUBLIC StandardLib BaseLib)
 
+add_library(RenderLib STATIC ${RENDERLIB_SOURCES})
+target_link_libraries(RenderLib PUBLIC SupportLib StandardLib BaseLib)
+
 add_library(RasterRenderLib STATIC ${RASTERRENDERLIB_SOURCES})
-target_link_libraries(RasterRenderLib PUBLIC RasterLib SupportLib StandardLib BaseLib)
+target_link_libraries(RasterRenderLib PUBLIC RenderLib RasterLib SupportLib StandardLib BaseLib)
 
 add_library(InputLib STATIC ${INPUTLIB_SOURCES})
 target_link_libraries(InputLib PUBLIC StandardLib BaseLib)
@@ -159,4 +164,4 @@ target_link_libraries(X11Lib PUBLIC WindowLib InputLib SupportLib StandardLib Ba
 
 add_executable(WindowInputTester ${TESTER_SOURCES})
 target_include_directories(WindowInputTester PRIVATE "${TESTER_DIR}")
-target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib RasterRenderLib RasterLib SupportLib StandardLib BaseLib)
+target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)
