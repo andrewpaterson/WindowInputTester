@@ -1,3 +1,4 @@
+#include "RasterRenderLib/RasterMeshBuild.h"
 #include "StandardLib/ClassDefines.h"
 #include "StandardLib/Objects.h"
 #include "WindowLib/Canvas.h"
@@ -142,7 +143,7 @@ bool CVRMLCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 //////////////////////////////////////////////////////////////////////////
 void CVRMLCanvasDraw::SetMesh(CMesh* pcMesh)
 {
-	mcMesh.Build(pcMesh);
+	BuildRasterMesh(&mcMesh, pcMesh);
 	mcCamera.Init();
 	if (msSize.x > 0)
 	{

@@ -283,6 +283,9 @@
     <ProjectReference Include="..\..\CommonLibraries\Libraries\RasterLib\RasterLib.vcxproj">
       <Project>{2e428e10-c931-4778-b914-ff2e90163de5}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\CommonLibraries\Libraries\RasterRenderLib\RasterRenderLib.vcxproj">
+      <Project>{8c1e5b47-3a9d-4f62-b0e4-71d2a6c93f58}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\SupportLib\SupportLib.vcxproj">
       <Project>{221022f1-b103-456a-8f55-721f33f2e26d}</Project>
     </ProjectReference>
