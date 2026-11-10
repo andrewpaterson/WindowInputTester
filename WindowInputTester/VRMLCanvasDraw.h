@@ -18,7 +18,7 @@ DESTRUCTABLE(CVRMLCanvasDraw);
 protected:
 	Ptr<CImageCanvasDraw>	mpCelDraw;
 	Ptr<CImage>				mpImage;  //What the rasteriser draws on.
-	CRasterMesh				mcMesh;
+	Ptr<CRasterMesh>		mpMesh;
 	CRasterCamera			mcCamera;
 	CRasteriser				mcRasteriser;
 	CRasterTarget			mcTarget;

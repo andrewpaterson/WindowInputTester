@@ -1,6 +1,6 @@
-#include "RasterRenderLib/RasterMeshBuild.h"
 #include "StandardLib/ClassDefines.h"
 #include "StandardLib/Objects.h"
+#include "RasterRenderLib/RasterMeshBuild.h"
 #include "WindowLib/Canvas.h"
 #include "VRMLCanvasDraw.h"
 
@@ -17,7 +17,7 @@ void CVRMLCanvasDraw::Init(Ptr<CWindowTheme> pTheme)
 
 	CCanvasDraw::Init();
 	mpCelDraw = OMalloc<CImageCanvasDraw>(Ptr<CImageCel>(), false);
-	mcMesh.Init();
+	mpMesh = OMalloc<CRasterMesh>();
 	mcCamera.Init();
 	mcRasteriser.Init();
 	mcTarget.mpiDepths = NULL;
@@ -39,7 +39,7 @@ void CVRMLCanvasDraw::Class(void)
 	CCanvasDraw::Class();
 	M_Pointer(mpCelDraw);
 	M_Pointer(mpImage);
-	U_Data(CRasterMesh, mcMesh);
+	M_Pointer(mpMesh);
 	U_Data(CRasterCamera, mcCamera);
 	U_Data(CRasteriser, mcRasteriser);
 	U_Data(CRasterTarget, mcTarget);
@@ -60,7 +60,6 @@ void CVRMLCanvasDraw::Free(void)
 		mcTarget.Kill();
 	}
 	mcRasteriser.Kill();
-	mcMesh.Kill();
 	CCanvasDraw::Free();
 }
 
@@ -128,7 +127,7 @@ bool CVRMLCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	if (mbDirty)
 	{
 		mcTarget.Clear(muiBackground);
-		mcRasteriser.Draw(&mcMesh, &mcCamera, &mcTarget);
+		mcRasteriser.Draw(&mpMesh, &mcCamera, &mcTarget);
 		mbDirty = false;
 	}
 	return mpCelDraw->Draw(pCanvas);
@@ -143,7 +142,7 @@ bool CVRMLCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 //////////////////////////////////////////////////////////////////////////
 void CVRMLCanvasDraw::SetMesh(CMesh* pcMesh)
 {
-	BuildRasterMesh(&mcMesh, pcMesh);
+	BuildRasterMesh(&mpMesh, pcMesh);
 	mcCamera.Init();
 	if (msSize.x > 0)
 	{
@@ -159,7 +158,7 @@ void CVRMLCanvasDraw::SetMesh(CMesh* pcMesh)
 //////////////////////////////////////////////////////////////////////////
 size CVRMLCanvasDraw::NumTriangles(void)
 {
-	return mcMesh.masOpaque.NumElements() + mcMesh.masTransparent.NumElements();
+	return mpMesh->masOpaque.NumElements() + mpMesh->masTransparent.NumElements();
 }
 
 
@@ -218,7 +217,7 @@ bool CVRMLCanvasDraw::LookAtScreen(int32 iX, int32 iY)
 		return false;
 	}
 	mcCamera.Prepare(msSize.x, msSize.y);
-	if (!mcCamera.LookAtScreen(iX, iY, &mcMesh.msMin, &mcMesh.msMax))
+	if (!mcCamera.LookAtScreen(iX, iY, &mpMesh->msMin, &mpMesh->msMax))
 	{
 		return false;
 	}
