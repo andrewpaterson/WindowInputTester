@@ -26,7 +26,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		cWinInput.Init(NULL, false);
 		cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
-		bResult = RunWindowInputTesterApp(&cNativeFactory, &cWinInput, "../../commonlibraries/Libraries/WinInputLib/xml");
+		bResult = RunWindowInputTesterApp(&cNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml");
 
 		cNativeFactory.SetRawInput(NULL, NULL);
 		cWinInput.Kill();

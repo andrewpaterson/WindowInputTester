@@ -3,7 +3,7 @@
 #
 # 64-bit only: there is no 32-bit libX11 installed.  Needs libx11-dev and libxext-dev.
 #
-# From the folder the WindowInputTester repository and commonlibraries are in:
+# From the folder the WindowInputTester repository and CommonLibraries are in:
 #
 #   cmake -S WindowInputTester -B build/WindowInputTester -G Ninja -DCMAKE_BUILD_TYPE=Debug
 #   cmake --build build/WindowInputTester
@@ -27,9 +27,9 @@ endif()
 
 option(BASELIB_ASAN "Build with AddressSanitizer and LeakSanitizer" OFF)
 
-# This repository is beside commonlibraries.
+# This repository is beside CommonLibraries.
 get_filename_component(CODAPHELA_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
-set(COMMON_DIR "${CODAPHELA_ROOT}/commonlibraries/Libraries")
+set(COMMON_DIR "${CODAPHELA_ROOT}/CommonLibraries/Libraries")
 set(BASELIB_DIR "${COMMON_DIR}/BaseLib")
 set(STANDARDLIB_DIR "${COMMON_DIR}/StandardLib")
 set(SUPPORTLIB_DIR "${COMMON_DIR}/SupportLib")
