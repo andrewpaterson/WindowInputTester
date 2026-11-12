@@ -190,7 +190,7 @@ void CEditorPage::MenuItemClicked(CMenuItem* pcItem)
 	}
 	else
 	{
-		mpTextArea->Paste(pcItem->GetText());
+		mpTextArea->GetEditing()->Paste(pcItem->GetText());
 	}
 }
 
