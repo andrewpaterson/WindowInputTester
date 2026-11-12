@@ -16,6 +16,7 @@
 #include "Keyboard.h"
 #include "KeyboardCanvasDraw.h"
 #include "MouseCanvasDraw.h"
+#include "WindowLib/Clipboard.h"
 #include "WindowInputTesterApp.h"
 
 
@@ -154,6 +155,8 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		pBackground->SetColour(mpTheme->GetColour(TC_Panel));
 		msDialogLook.pcTheme = &mpTheme;
 		msDialogLook.pcDimFont = &mpFontColours->GetFont(mpTheme->GetColour(TC_Icon));
+		mpPasteHistory = OMalloc<CPasteHistoryDialog>(mpWindow, &msDialogLook, mpTheme->GetFont());
+		mpWindow->GetClipboard()->GetHistory()->SetChooser(&mpPasteHistory);
 		mpTabbed = OMalloc<CTabbedContainer>(mpWindow, mpTheme);
 		mpTabbed->SetAlignment(CSH_Stretch, CSV_Stretch);
 
@@ -237,6 +240,7 @@ void CWindowInputTesterApp::Class(void)
 {
 	M_Pointer(mpWindow);
 	M_Pointer(mpFontColours);
+	M_Pointer(mpPasteHistory);
 	M_Pointer(mpTheme);
 	M_Pointer(mpTabbed);
 	M_Pointer(mpMenuBar);
@@ -264,6 +268,10 @@ void CWindowInputTesterApp::Free(void)
 	if (mbInputs)
 	{
 		mcComponentInput.Kill();
+	}
+	if (mpPasteHistory.IsNotNull() && mpWindow.IsNotNull())
+	{
+		mpWindow->GetClipboard()->GetHistory()->SetChooser(NULL);
 	}
 	msDialogLook.Kill();
 }

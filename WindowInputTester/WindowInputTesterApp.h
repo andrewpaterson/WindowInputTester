@@ -6,6 +6,7 @@
 #include "InputLib/Input.h"
 #include "InputLib/NativeInput.h"
 #include "WindowLib/Window.h"
+#include "WindowLib/PasteHistoryDialog.h"
 #include "WindowLib/WindowTheme.h"
 #include "WindowLib/TabbedContainer.h"
 #include "WindowLib/MenuBar.h"
@@ -35,6 +36,7 @@ protected:
 	Ptr<CTabNameListener>		mpTabNameListener;
 	Ptr<CVRMLPage>				mpVRMLPage;
 	SDialogLook					msDialogLook;
+	Ptr<CPasteHistoryDialog>	mpPasteHistory;  //Paste from History (Control+Shift+V): what the clipboard's history chooses with.
 	SWindowInputTesterDialogs	msDialogs;  //The window's tick shows the dialogs the listeners ask for.
 	Ptr<CInput>					mpInput;
 	Ptr<CWindowInputSource>		mpInputSource;
