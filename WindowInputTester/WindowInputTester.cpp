@@ -1,4 +1,5 @@
 #include <windows.h>
+#include "BaseLib/LeakDetector.h"
 #include "BaseLib/GlobalMemory.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
@@ -13,7 +14,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 {
 	bool	bResult;
 
-	_CrtSetBreakAlloc(0);
+	BreakOnAllocation(0);
 	InitWindowInputTesterGlobals();
 
 	{
@@ -34,6 +35,6 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 	KillWindowInputTesterGlobals();
-	_CrtDumpMemoryLeaks();
+	LeakDetection();
 	return bResult ? 0 : 1;
 }
