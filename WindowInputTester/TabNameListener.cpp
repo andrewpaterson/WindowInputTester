@@ -1,6 +1,7 @@
 #include "StandardLib/Objects.h"
 #include "StandardLib/ObjectReader.h"
 #include "StandardLib/ObjectWriter.h"
+#include "InputPage.h"
 #include "TabNameListener.h"
 
 
@@ -42,13 +43,13 @@ bool AskTabName(Ptr<CWindow> pOwner, SDialogLook* psLook, const char* szTitle, c
 //
 //
 //////////////////////////////////////////////////////////////////////////
-void CTabNameListener::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabComponent> pInputTab)
+void CTabNameListener::Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabbedContainer> pTabbed)
 {
 	PreInit();
 
 	mpOwner = pOwner;
 	mpsLook = psLook;
-	mpInputTab = pInputTab;
+	mpTabbed = pTabbed;
 	mpRenameTab = NULL;
 
 	PostInit();
@@ -63,7 +64,7 @@ void CTabNameListener::Class(void)
 {
 	M_Pointer(mpOwner);
 	U_Pointer(mpsLook);
-	M_Pointer(mpInputTab);
+	M_Pointer(mpTabbed);
 	M_Pointer(mpRenameTab);
 }
 
@@ -106,7 +107,10 @@ void CTabNameListener::Free(void)
 //////////////////////////////////////////////////////////////////////////
 void CTabNameListener::TabDoubleClicked(CTabComponent* pcTab)
 {
-	if (&mpInputTab != pcTab)
+	size	uiIndex;
+
+	uiIndex = mpTabbed->IndexOf(pcTab);
+	if ((uiIndex != ARRAY_ELEMENT_NOT_FOUND) && !IsInputPage(mpTabbed->GetPage(uiIndex)))
 	{
 		mpRenameTab = pcTab;
 	}

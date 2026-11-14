@@ -242,6 +242,7 @@
     <ClCompile Include="TabNameListener.cpp" />
     <ClCompile Include="FileMenuListener.cpp" />
     <ClCompile Include="EditorPage.cpp" />
+    <ClCompile Include="InputPage.cpp" />
     <ClCompile Include="VRMLCanvasDraw.cpp" />
     <ClCompile Include="VRMLPage.cpp" />
     <ClCompile Include="Key.cpp" />
@@ -259,6 +260,7 @@
     <ClInclude Include="TabNameListener.h" />
     <ClInclude Include="FileMenuListener.h" />
     <ClInclude Include="EditorPage.h" />
+    <ClInclude Include="InputPage.h" />
     <ClInclude Include="VRMLCanvasDraw.h" />
     <ClInclude Include="VRMLPage.h" />
     <ClInclude Include="Key.h" />

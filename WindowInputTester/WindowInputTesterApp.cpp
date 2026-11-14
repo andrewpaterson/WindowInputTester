@@ -12,30 +12,11 @@
 #include "WindowLib/GridContainer.h"
 #include "WindowLib/Canvas.h"
 #include "WindowLib/JewelTheme.h"
-#include "WindowLib/JewelImageGenerator.h"
-#include "Keyboard.h"
-#include "KeyboardCanvasDraw.h"
-#include "MouseCanvasDraw.h"
 #include "WindowLib/Clipboard.h"
 #include "WindowInputTesterApp.h"
 
 
 #define WINDOW_INPUT_TESTER_FONT_CHARACTERS	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-// A canvas that stretches to fill its cell.
-//
-//////////////////////////////////////////////////////////////////////////
-Ptr<CCanvas> CreateCanvas(Ptr<CWindow> pWindow, Ptr<CCanvasDraw> pDraw)
-{
-	Ptr<CCanvas>	pCanvas;
-
-	pCanvas = OMalloc<CCanvas>(pWindow, pDraw);
-	pCanvas->SetAlignment(CSH_Stretch, CSV_Stretch);
-	return pCanvas;
-}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -119,14 +100,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 {
 	Ptr<CFont>				pWhite;
 	Ptr<CGridContainer>		pMain;
-	Ptr<CGridContainer>		pGrid;
 	Ptr<CMenuContainer>		pFileMenu;
-	Ptr<CTabComponent>		pInputTab;
-	Ptr<CKeyboard>			pKeyboard;
-	Ptr<CMouse>				pMouse;
-	Ptr<CCanvas>			pMouseCanvas;
-	Ptr<CCanvas>			pKeyboardCanvas;
-	CColourFormatHelper		cFormat;
 	Ptr<CClearCanvasDraw>	pBackground;
 
 	pBackground = OMalloc<CClearCanvasDraw>(0);  //Coloured once there is a theme.
@@ -162,35 +136,12 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		pMain->AddComponent(mpTabbed, 0, 1, 1, 1, 1, 1);
 		mpWindow->SetContainer(pMain);
 
-		//Two cells on top, each half the width, over one cell spanning both columns.  The rows are each half the height.
-		//The page takes focus when clicked so the keys have somewhere to go.
-		pGrid = OMalloc<CGridContainer>(mpWindow);
-		pGrid->SetAlignment(CSH_Stretch, CSV_Stretch);
-		pGrid->SetCanGetFocus(true);
-		pMouse = OMalloc<CMouse>();
-		pMouseCanvas = CreateCanvas(mpWindow, OMalloc<CMouseCanvasDraw>(pMouse, mpTheme));
-		pGrid->AddComponent(pMouseCanvas, 0, 0, 1, 1, 1, 1);
-		pGrid->AddComponent(CreateCanvas(mpWindow, OMalloc<CClearCanvasDraw>(mpTheme->GetColour(TC_Editor))), 1, 0, 1, 1, 1, 1);
-		pKeyboard = OMalloc<CKeyboard>();
-		pKeyboardCanvas = CreateCanvas(mpWindow, OMalloc<CKeyboardCanvasDraw>(pKeyboard, mpTheme->GetFont(), mpTheme));
-		pGrid->AddComponent(pKeyboardCanvas, 0, 1, 2, 1, 1, 1);
-
-		//They draw every paint, so they show the devices as they are.
-		pMouseCanvas->SetDrawnEveryPaint(true);
-		pKeyboardCanvas->SetDrawnEveryPaint(true);
-
-		//The keyboard and the mouse's buttons read the devices as they are drawn.  The wheel's rolls and the mouse's
-		//movement are only events, which go from the focussed component (the one under the pointer for movement) up to
-		//the main container, which shows them on the mouse and passes them on.
-		pMain->AddInputAction(IAF_AnyKeyDown, NULL, &pMouse, &CMouse::KeyAction);
-		pMain->AddInputAction(IAF_Movement, NULL, &pMouse, &CMouse::MovementAction);
-		mpWindow->GetColourFormat(&cFormat);
-		pInputTab = mpTabbed->AddTab("Input", pGrid, CJewelImageGenerator::CreateKeyboard(mpTheme->GetColour(TC_Icon), &cFormat));
+		//No tab is open to start with: File's Input Tester, New and Open make them.
 		mpFileMenuListener = OMalloc<CFileMenuListener>(mpWindow, &msDialogLook, mpFontColours, mpTabbed, pFileMenu);
 		mpMenuBar->GetItemClickEvent()->Add(&mpFileMenuListener, &CFileMenuListener::MenuItemClicked);
 
 		//Double clicking a tab other than Input renames it.
-		mpTabNameListener = OMalloc<CTabNameListener>(mpWindow, &msDialogLook, pInputTab);
+		mpTabNameListener = OMalloc<CTabNameListener>(mpWindow, &msDialogLook, mpTabbed);
 		mpTabbed->GetDoubleClickEvent()->Add(&mpTabNameListener, &CTabNameListener::TabDoubleClicked);
 		msDialogs.pcFileMenu = &mpFileMenuListener;
 		msDialogs.pcTabNames = &mpTabNameListener;
@@ -205,9 +156,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 		mcComponentInput.AddMice();
 		mpWindow->SetComponentInput(&mcComponentInput);
 
-		mpWindow->GetFocus()->SetFocus(pGrid);
 		mpWindow->SetWindowSize(1280, 800);
-
 	}
 	return mbValid;
 }

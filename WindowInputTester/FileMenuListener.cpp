@@ -4,6 +4,7 @@
 #include "StandardLib/ObjectWriter.h"
 #include "WindowLib/FileChooser.h"
 #include "WindowLib/JewelImageGenerator.h"
+#include "InputPage.h"
 #include "TabNameListener.h"
 #include "FileMenuListener.h"
 
@@ -47,7 +48,10 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	pWindow->GetColourFormat(&cFormat);
 	mpFolderIcon = CJewelImageGenerator::CreateFolder(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
 	mpFileIcon = CJewelImageGenerator::CreateFile(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
+	mpKeyboardIcon = CJewelImageGenerator::CreateKeyboard(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
 
+	mpInputTester = pFileMenu->AddItem("Input Tester", mpKeyboardIcon);
+	pFileMenu->AddSeparator();
 	mpNewEditorTab = pFileMenu->AddItem("New...");
 	mpOpenFile = pFileMenu->AddItem("Open...", mpFileIcon);
 	mpSaveFile = pFileMenu->AddItem("Save...");
@@ -66,11 +70,13 @@ void CFileMenuListener::Class(void)
 	U_Pointer(mpsLook);
 	M_Pointer(mpFontColours);
 	M_Pointer(mpTabbed);
+	M_Pointer(mpInputTester);
 	M_Pointer(mpNewEditorTab);
 	M_Pointer(mpOpenFile);
 	M_Pointer(mpSaveFile);
 	M_Pointer(mpFolderIcon);
 	M_Pointer(mpFileIcon);
+	M_Pointer(mpKeyboardIcon);
 	M_Pointer(mpChooser);
 	U_String(mszLastFile);
 	U_Int32(miNextEditor);
@@ -128,7 +134,11 @@ Ptr<CTabComponent> CFileMenuListener::AddEditorTab(const char* szName, const cha
 //////////////////////////////////////////////////////////////////////////
 void CFileMenuListener::MenuItemClicked(CMenuItem* pcItem)
 {
-	if (&mpNewEditorTab == pcItem)
+	if (&mpInputTester == pcItem)
+	{
+		meDialog = FMD_InputTester;
+	}
+	else if (&mpNewEditorTab == pcItem)
 	{
 		meDialog = FMD_NewEditorTab;
 	}
@@ -154,7 +164,11 @@ void CFileMenuListener::ShowDialog(void)
 
 	eDialog = meDialog;
 	meDialog = FMD_None;
-	if (eDialog == FMD_NewEditorTab)
+	if (eDialog == FMD_InputTester)
+	{
+		OpenInputTester();
+	}
+	else if (eDialog == FMD_NewEditorTab)
 	{
 		NewEditorTab();
 	}
@@ -166,6 +180,36 @@ void CFileMenuListener::ShowDialog(void)
 	{
 		SaveFile();
 	}
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// There's only ever one Input tab: two would show the same devices.
+//
+//////////////////////////////////////////////////////////////////////////
+void CFileMenuListener::OpenInputTester(void)
+{
+	Ptr<CComponent>		pPage;
+	Ptr<CTabComponent>	pTab;
+	size				i;
+
+	for (i = 0; i < mpTabbed->NumTabs(); i++)
+	{
+		if (IsInputPage(mpTabbed->GetPage(i)))
+		{
+			pTab = mpTabbed->GetTab(i);
+			pPage = mpTabbed->GetPage(i);
+			break;
+		}
+	}
+	if (pTab.IsNull())
+	{
+		pPage = OMalloc<CInputPage>(mpWindow, mpsLook->pcTheme);
+		pTab = mpTabbed->AddTab("Input", pPage, mpKeyboardIcon, true);
+	}
+	mpTabbed->Select(pTab);
+	mpWindow->GetFocus()->SetFocus(pPage);
 }
 
 

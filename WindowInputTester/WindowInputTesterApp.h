@@ -19,9 +19,9 @@
 #include "TabNameListener.h"
 
 
-//The window input tester: its window (the mouse and the keyboard in a tab under a menu bar, which is the only tab it starts with;
-//File's New and Open add editors and VRML views), the menu and tab listeners and the input that drives it.  main makes it, adds
-//it to the root, runs it and removes it from the root.
+//The window input tester: its window (tabs under a menu bar, none to start with: File's Input Tester adds the mouse and the
+//keyboard, and New and Open add editors and VRML views), the menu and tab listeners and the input that drives it.  main makes
+//it, adds it to the root, runs it and removes it from the root.
 class CWindowInputTesterApp : public CObject
 {
 CONSTRUCTABLE(CWindowInputTesterApp);

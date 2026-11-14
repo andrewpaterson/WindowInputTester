@@ -13,13 +13,15 @@
 enum EFileMenuDialog
 {
 	FMD_None,
+	FMD_InputTester,
 	FMD_NewEditorTab,
 	FMD_OpenFile,
 	FMD_SaveFile,
 };
 
 
-//The File menu.  New Editor Tab asks for a name with AskTabName and adds a closable editor tab with it, which is
+//The File menu.  Input Tester adds a closable Input tab, or selects it if it's already open, and focusses its page so the
+//keys go to it.  New Editor Tab asks for a name with AskTabName and adds a closable editor tab with it, which is
 //selected; Cancel, or an empty name, adds nothing.  Open File asks for a file with a CFileChooser and loads it into a new
 //closable tab named after the file, which is selected: a VRML view for a .wrl file and an editor for any other.  Save File asks for a file to save the selected editor
 //tab's text to, starting on the file it was last loaded from or saved to, and renames the tab after it; it does
@@ -35,11 +37,13 @@ protected:
 	SDialogLook*			mpsLook;
 	Ptr<CFontColours>		mpFontColours;
 	Ptr<CTabbedContainer>	mpTabbed;
+	Ptr<CMenuItem>			mpInputTester;
 	Ptr<CMenuItem>			mpNewEditorTab;
 	Ptr<CMenuItem>			mpOpenFile;
 	Ptr<CMenuItem>			mpSaveFile;
 	Ptr<CImageCel>			mpFolderIcon;
 	Ptr<CImageCel>			mpFileIcon;
+	Ptr<CImageCel>			mpKeyboardIcon;
 	Ptr<CFileChooser>		mpChooser;  //While Load or Save's chooser is shown.
 	CChars					mszLastFile;  //The file last opened or saved, empty if none has been.
 	int						miNextEditor;  //The number in the next tab's suggested name.
@@ -58,6 +62,7 @@ public:
 	void					ShowDialog(void);
 
 protected:
+	void					OpenInputTester(void);
 	void					NewEditorTab(void);
 	void					OpenFile(void);
 	void					AddFileTab(const char* szFilename, Ptr<CComponent> pPage);

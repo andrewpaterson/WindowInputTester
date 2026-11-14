@@ -15,11 +15,11 @@ DESTRUCTABLE(CTabNameListener);
 protected:
 	Ptr<CWindow>		mpOwner;
 	SDialogLook*		mpsLook;
-	Ptr<CTabComponent>	mpInputTab;
+	Ptr<CTabbedContainer>	mpTabbed;
 	Ptr<CTabComponent>	mpRenameTab;  //The tab to ask the name of next tick, NULL for none.
 
 public:
-	void	Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabComponent> pInputTab);
+	void	Init(Ptr<CWindow> pOwner, SDialogLook* psLook, Ptr<CTabbedContainer> pTabbed);
 	void	Class(void) override;
 	void	Free(void) override;
 
