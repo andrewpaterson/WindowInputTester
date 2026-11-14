@@ -48,6 +48,7 @@ void CSceneCanvasDraw::Init(Ptr<CWindowTheme> pTheme, CLabel* pcStatus)
 
 	msCentre.Init(0, 0, 0);
 	mfRadius = 1.0f;
+	muiView = 0;
 	msStartTarget.Init(0, 0, 0);
 	mfStartYaw = 0;
 	mfStartPitch = 0;
@@ -96,6 +97,7 @@ void CSceneCanvasDraw::Class(void)
 	U_Bool(mbVulkan);
 	U_3Float32(msCentre);
 	U_Float32(mfRadius);
+	U_Size(muiView);
 	U_3Float32(msStartTarget);
 	U_Float32(mfStartYaw);
 	U_Float32(mfStartPitch);
@@ -328,47 +330,103 @@ void CSceneCanvasDraw::FindBounds(void)
 
 //////////////////////////////////////////////////////////////////////////
 //
-// Where the scene's first camera is, looking the way it does about the
-// point in front of it nearest the scene's middle, its roll left out as
-// the turntable keeps up up.  With no camera, looking along -z at the
-// scene's middle from far enough away to see it all across the shorter
-// way of a 4 by 3 view.
+// The scene's first camera, or the framed view if it has none.
 //
 //////////////////////////////////////////////////////////////////////////
 void CSceneCanvasDraw::StartView(void)
 {
-	Ptr<CCamera>	pCamera;
+	muiView = 0;
+	if ((mpScene->mapCameras.NumElements() == 0) || !StartFromCamera(mpScene->mapCameras.Get(0)))
+	{
+		muiView = mpScene->mapCameras.NumElements();
+		StartFramed();
+	}
+	ResetView();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// The next scene camera, or the last, going round through the framed view
+// after the last camera.  A camera that isn't placed is passed over.
+//
+//////////////////////////////////////////////////////////////////////////
+void CSceneCanvasDraw::StepView(bool bForward)
+{
+	size	uiNumViews;
+	size	i;
+
+	uiNumViews = mpScene->mapCameras.NumElements() + 1;
+	for (i = 0; i < uiNumViews; i++)
+	{
+		muiView = bForward ? ((muiView + 1) % uiNumViews) : ((muiView + uiNumViews - 1) % uiNumViews);
+		if (muiView == uiNumViews - 1)
+		{
+			StartFramed();
+			break;
+		}
+		if (StartFromCamera(mpScene->mapCameras.Get(muiView)))
+		{
+			break;
+		}
+	}
+	ResetView();
+	SetStatus();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Where pCamera is now, with its field of view, looking the way it does
+// about the point in front of it nearest the scene's middle, its roll left
+// out as the turntable keeps up up.  False if it isn't placed.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CSceneCanvasDraw::StartFromCamera(Ptr<CCamera> pCamera)
+{
 	SFloat4x4*		psWorld;
 	SFloat32Vec3	sBack;
 	SFloat32Vec3	sToCamera;
 	float32			fLength;
 	float32			fDistance;
-	float32			fHalfFOV;
 
-	pCamera = (mpScene->mapCameras.NumElements() > 0) ? mpScene->mapCameras.Get(0) : Ptr<CCamera>();
-	if (pCamera.IsNotNull() && pCamera->mpConnection.IsNotNull())
+	if (pCamera.IsNull() || pCamera->mpConnection.IsNull())
 	{
-		mpCamera->mfFOV = pCamera->mfFOV;
-		psWorld = &pCamera->mpConnection->msWorldMatrix;
-		sBack.Init(psWorld->z.x, psWorld->z.y, psWorld->z.z);
-		fLength = sqrtf(sBack.x * sBack.x + sBack.y * sBack.y + sBack.z * sBack.z);
-		if (fLength > 0)
-		{
-			sBack.Init(sBack.x / fLength, sBack.y / fLength, sBack.z / fLength);
-			sToCamera.Init(psWorld->pos.x - msCentre.x, psWorld->pos.y - msCentre.y, psWorld->pos.z - msCentre.z);
-			fDistance = sToCamera.x * sBack.x + sToCamera.y * sBack.y + sToCamera.z * sBack.z;
-			if (fDistance <= 0)
-			{
-				fDistance = mfRadius;
-			}
-			mfStartPitch = asinf(fmaxf(-1.0f, fminf(1.0f, sBack.y)));
-			mfStartYaw = atan2f(sBack.x, sBack.z);
-			mfStartDistance = fDistance;
-			msStartTarget.Init(psWorld->pos.x - sBack.x * fDistance, psWorld->pos.y - sBack.y * fDistance, psWorld->pos.z - sBack.z * fDistance);
-			ResetView();
-			return;
-		}
+		return false;
 	}
+	psWorld = &pCamera->mpConnection->msWorldMatrix;
+	sBack.Init(psWorld->z.x, psWorld->z.y, psWorld->z.z);
+	fLength = sqrtf(sBack.x * sBack.x + sBack.y * sBack.y + sBack.z * sBack.z);
+	if (fLength <= 0)
+	{
+		return false;
+	}
+
+	mpCamera->mfFOV = pCamera->mfFOV;
+	sBack.Init(sBack.x / fLength, sBack.y / fLength, sBack.z / fLength);
+	sToCamera.Init(psWorld->pos.x - msCentre.x, psWorld->pos.y - msCentre.y, psWorld->pos.z - msCentre.z);
+	fDistance = sToCamera.x * sBack.x + sToCamera.y * sBack.y + sToCamera.z * sBack.z;
+	if (fDistance <= 0)
+	{
+		fDistance = mfRadius;
+	}
+	mfStartPitch = asinf(fmaxf(-1.0f, fminf(1.0f, sBack.y)));
+	mfStartYaw = atan2f(sBack.x, sBack.z);
+	mfStartDistance = fDistance;
+	msStartTarget.Init(psWorld->pos.x - sBack.x * fDistance, psWorld->pos.y - sBack.y * fDistance, psWorld->pos.z - sBack.z * fDistance);
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Looking along -z at the scene's middle from far enough away to see it
+// all across the shorter way of a 4 by 3 view.
+//
+//////////////////////////////////////////////////////////////////////////
+void CSceneCanvasDraw::StartFramed(void)
+{
+	float32	fHalfFOV;
 
 	mpCamera->mfFOV = SCENE_FOV;
 	fHalfFOV = atanf(tanf(SCENE_FOV * 0.5f) * 3.0f / 4.0f);
@@ -376,7 +434,6 @@ void CSceneCanvasDraw::StartView(void)
 	mfStartPitch = 0;
 	mfStartDistance = mfRadius / sinf(fHalfFOV);
 	msStartTarget = msCentre;
-	ResetView();
 }
 
 
@@ -577,8 +634,27 @@ void CSceneCanvasDraw::SetStatus(void)
 		szStatus.Append((int32)(mfDrawMilliseconds + 0.5));
 		szStatus.Append(" ms a frame");
 	}
-	szStatus.Append(mbPlaying ? ", playing." : ", paused.");
-	szStatus.Append("  Space pauses, R switches renderer and Home puts the view back.");
+	szStatus.Append(mbPlaying ? ", playing" : ", paused");
+	if (mpScene->mapCameras.NumElements() > 0)
+	{
+		if (muiView < mpScene->mapCameras.NumElements())
+		{
+			szStatus.Append(", camera ");
+			szStatus.Append((int32)(muiView + 1));
+			szStatus.Append(" of ");
+			szStatus.Append((int32)mpScene->mapCameras.NumElements());
+		}
+		else
+		{
+			szStatus.Append(", the whole scene");
+		}
+	}
+	szStatus.Append(".  Space pauses, R switches renderer, ");
+	if (mpScene->mapCameras.NumElements() > 0)
+	{
+		szStatus.Append("C and Shift+C change camera, ");
+	}
+	szStatus.Append("Home puts the view back.");
 	mpcStatus->SetText(szStatus.Text());
 	szStatus.Kill();
 }

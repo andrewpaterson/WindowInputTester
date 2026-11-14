@@ -11,7 +11,8 @@
 //A scene tab's page, which File's Open makes from a scene file: what's drawn and how along the top, over a view of the scene
 //drawn by Vulkan (see CSceneCanvasDraw).  The left button's drag turns the view about what it looks at, the middle or right
 //button's drag pans, and the wheel zooms.  Space pauses and plays the animations, R switches between Vulkan and the
-//rasteriser and Home puts the view back where it started.
+//rasteriser, C and Shift+C go to the scene's next and last camera, and the whole scene after its last, and Home puts the
+//view back where its camera started it.
 class CScenePage : public CGridContainer
 {
 CONSTRUCTABLE(CScenePage);
@@ -35,6 +36,7 @@ public:
 	void	SpaceAction(SComponentInputEvent* psEvent);
 	void	RendererAction(SComponentInputEvent* psEvent);
 	void	HomeAction(SComponentInputEvent* psEvent);
+	void	CameraAction(SComponentInputEvent* psEvent);
 };
 
 

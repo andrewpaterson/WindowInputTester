@@ -32,6 +32,7 @@ void CScenePage::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFontColour
 	mpCanvas->AddInputAction(IAF_KeyDown, "Space", this, &CScenePage::SpaceAction);
 	mpCanvas->AddInputAction(IAF_KeyDown, "R", this, &CScenePage::RendererAction);
 	mpCanvas->AddInputAction(IAF_KeyDown, "Home", this, &CScenePage::HomeAction);
+	mpCanvas->AddInputAction(IAF_KeyDown, "C", this, &CScenePage::CameraAction);
 
 	AddComponent(mpStatus, 0, 0, 1, 1, 1, 0);
 	AddComponent(mpCanvas, 0, 1, 1, 1, 1, 1);
@@ -164,5 +165,19 @@ void CScenePage::RendererAction(SComponentInputEvent* psEvent)
 void CScenePage::HomeAction(SComponentInputEvent* psEvent)
 {
 	mpDraw->ResetView();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Shift+C isn't a chord, so it's C with Shift down.
+//
+//////////////////////////////////////////////////////////////////////////
+void CScenePage::CameraAction(SComponentInputEvent* psEvent)
+{
+	CComponentInput*	pcInput;
+
+	pcInput = GetWindow()->GetComponentInput();
+	mpDraw->StepView((pcInput == NULL) || !pcInput->IsShift());
 }
 

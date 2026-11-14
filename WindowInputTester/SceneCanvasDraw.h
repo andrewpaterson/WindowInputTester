@@ -31,7 +31,8 @@ class CWindow;
 //
 //The view is the draw's own camera, not the scene's: a turntable, turning about a point by its yaw and pitch, so up stays up.
 //It starts where the scene's first camera is, with its field of view, or with none it's framed on the scene posed at the
-//start.  ResetView puts it back.
+//start.  StepView goes to the scene's next or last camera, and after the last to the framed view, and round.  ResetView
+//puts the view back where its camera, or the framed view, started it.
 //
 //The status label, which the page holds, says what's drawn and how; it's set outside the paint.
 class CSceneCanvasDraw : public CCanvasDraw
@@ -61,6 +62,7 @@ protected:
 
 	SFloat32Vec3				msCentre;  //Of the scene as it was posed at the start,
 	float32						mfRadius;  //and how far it goes from there.
+	size						muiView;  //The scene camera the view started from, or the number of cameras for the framed view.
 	SFloat32Vec3				msStartTarget;  //Where ResetView puts the view.
 	float32						mfStartYaw;
 	float32						mfStartPitch;
@@ -93,6 +95,7 @@ public:
 	void		SwitchRenderer(void);
 	void		SwitchPlaying(void);
 	void		ResetView(void);
+	void		StepView(bool bForward);
 	void		Orbit(int32 iRight, int32 iDown);
 	void		Pan(int32 iRight, int32 iDown);
 	void		Zoom(float32 fFactor);
@@ -102,6 +105,8 @@ protected:
 	void		Advance(int64 iNow);
 	void		FindBounds(void);
 	void		StartView(void);
+	bool		StartFromCamera(Ptr<CCamera> pCamera);
+	void		StartFramed(void);
 	void		PlaceCamera(void);
 	bool		DrawRaster(void);
 	void		SetStatus(void);
