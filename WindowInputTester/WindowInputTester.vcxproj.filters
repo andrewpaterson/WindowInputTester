@@ -22,6 +22,12 @@
     <ClCompile Include="InputPage.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="SceneCanvasDraw.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="ScenePage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
     <ClCompile Include="VRMLCanvasDraw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -70,6 +76,12 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="InputPage.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="SceneCanvasDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="ScenePage.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="VRMLCanvasDraw.h">

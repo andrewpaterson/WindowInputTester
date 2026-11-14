@@ -14,6 +14,7 @@ static SFileChooserType gasOpenFileTypes[] =
 {
 	{ "Text Files (*.txt)", "txt" },
 	{ "VRML Files (*.wrl)", "wrl" },
+	{ "Scene Files (*.drg)", "drg" },
 	{ "All Files", NULL },
 };
 
@@ -243,6 +244,7 @@ void CFileMenuListener::NewEditorTab(void)
 void CFileMenuListener::OpenFile(void)
 {
 	CFileUtil			cFileUtil;
+	Ptr<CScenePage>		pScene;
 	Ptr<CVRMLPage>		pVRML;
 	Ptr<CEditorPage>	pEditor;
 	char*				szFilename;
@@ -253,7 +255,16 @@ void CFileMenuListener::OpenFile(void)
 		szFilename = mpChooser->GetChosen();
 		mszLastFile.Set(szFilename);
 
-		if (cFileUtil.IsExtension(szFilename, "wrl", true))
+		if (cFileUtil.IsExtension(szFilename, "drg", true))
+		{
+			pScene = OMalloc<CScenePage>(mpWindow, mpsLook, mpFontColours);
+			if (pScene->ReadScene(szFilename))
+			{
+				AddFileTab(szFilename, pScene);
+				pScene->FocusView();
+			}
+		}
+		else if (cFileUtil.IsExtension(szFilename, "wrl", true))
 		{
 			pVRML = OMalloc<CVRMLPage>(mpWindow, mpsLook, mpFontColours);
 			if (pVRML->LoadVRML(szFilename))

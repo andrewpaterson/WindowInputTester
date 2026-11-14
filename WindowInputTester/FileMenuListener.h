@@ -7,6 +7,7 @@
 #include "WindowLib/Dialog.h"
 #include "WindowLib/FileChooser.h"
 #include "EditorPage.h"
+#include "ScenePage.h"
 #include "VRMLPage.h"
 
 
@@ -23,7 +24,8 @@ enum EFileMenuDialog
 //The File menu.  Input Tester adds a closable Input tab, or selects it if it's already open, and focusses its page so the
 //keys go to it.  New Editor Tab asks for a name with AskTabName and adds a closable editor tab with it, which is
 //selected; Cancel, or an empty name, adds nothing.  Open File asks for a file with a CFileChooser and loads it into a new
-//closable tab named after the file, which is selected: a VRML view for a .wrl file and an editor for any other.  Save File asks for a file to save the selected editor
+//closable tab named after the file, which is selected: a scene drawn by Vulkan for a .drg file, a VRML view for a .wrl file
+//and an editor for any other.  Save File asks for a file to save the selected editor
 //tab's text to, starting on the file it was last loaded from or saved to, and renames the tab after it; it does
 //nothing if the selected tab isn't an editor.
 //Clicking an item (MenuItemClicked, on the menu bar's item click event) only asks for its dialog; the window's tick
