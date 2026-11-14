@@ -7,6 +7,7 @@
 
 #define MOUSE_ROLLED_MILLISECONDS	300  //How long the wheel counts as rolled after a roll.
 #define MOUSE_MOTION_MILLISECONDS	80.0  //How quickly the velocity follows the movement; it falls to a third this long after the mouse stops.
+#define MOUSE_STILL_MILLISECONDS	200  //How long after it last moved the mouse is still, whatever its velocity.
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -27,6 +28,7 @@ void CMouse::Init(void)
 	mfVelocityRight = 0;
 	mfVelocityDown = 0;
 	miMotionTime = 0;
+	miMovedTime = 0;
 
 	PostInit();
 }
@@ -48,6 +50,7 @@ void CMouse::Class(void)
 	U_Float64(mfVelocityRight);
 	U_Float64(mfVelocityDown);
 	U_Int64(miMotionTime);
+	U_Int64(miMovedTime);
 }
 
 
@@ -129,13 +132,18 @@ void CMouse::MovementAction(SComponentInputEvent* psEvent)
 	psEvent->bPass = true;
 	miMovedRight += psEvent->iRight;
 	miMovedDown += psEvent->iDown;
+	if ((psEvent->iRight != 0) || (psEvent->iDown != 0))
+	{
+		miMovedTime = GetDebugTickCount();
+	}
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 //
 // The movement since the last call, over the time since it, is blended
-// into the velocity; the longer the time the more it counts.  iNow is in
+// into the velocity; the longer the time the more it counts.  It's 0 once
+// the mouse hasn't moved for MOUSE_STILL_MILLISECONDS.  iNow is in
 // milliseconds, as GetDebugTickCount.
 //
 //////////////////////////////////////////////////////////////////////////
@@ -161,9 +169,26 @@ void CMouse::UpdateMotion(int64 iNow)
 	fKeep = exp(-fElapsed / MOUSE_MOTION_MILLISECONDS);
 	mfVelocityRight = mfVelocityRight * fKeep + (miMovedRight * 1000.0 / fElapsed) * (1 - fKeep);
 	mfVelocityDown = mfVelocityDown * fKeep + (miMovedDown * 1000.0 / fElapsed) * (1 - fKeep);
+	if (iNow - miMovedTime >= MOUSE_STILL_MILLISECONDS)
+	{
+		mfVelocityRight = 0;
+		mfVelocityDown = 0;
+	}
 	miMovedRight = 0;
 	miMovedDown = 0;
 	miMotionTime = iNow;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Whether what's drawn will change at iNow with no more input: it has a
+// velocity, which fades, or the wheel counts as rolled, which goes out.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CMouse::IsChanging(int64 iNow)
+{
+	return (mfVelocityRight != 0) || (mfVelocityDown != 0) || ((GetState(iNow) & (MOUSE_ROLLED_UP | MOUSE_ROLLED_DOWN)) != 0);
 }
 
 

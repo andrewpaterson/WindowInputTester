@@ -17,8 +17,9 @@
 //for a moment after each roll.
 //
 //Movement is heard by MovementAction as how far the mouse moved right and down since the last event, in the device's
-//counts.  UpdateMotion turns what moved since it was last called into a velocity, smoothed so that it fades out over
-//a fraction of a second once the mouse stops.
+//counts.  UpdateMotion turns what moved since it was last called into a velocity, smoothed so that it fades once the mouse
+//stops, and 0 once it hasn't moved for MOUSE_STILL_MILLISECONDS.  IsChanging says whether what's drawn of it will change
+//with no more input: while it moves or fades, or the wheel counts as rolled.
 class CMouse : public CObject
 {
 CONSTRUCTABLE(CMouse);
@@ -34,6 +35,7 @@ protected:
 	float64	mfVelocityRight;  //Smoothed, in counts a second.
 	float64	mfVelocityDown;
 	int64	miMotionTime;  //When UpdateMotion was last called, 0 if it hasn't been.
+	int64	miMovedTime;  //When it last moved, 0 if it hasn't.
 
 public:
 	void	Init(void);
@@ -48,6 +50,7 @@ public:
 	void	UpdateMotion(int64 iNow);
 	void	ReleaseAll(void);
 	int32	GetState(int64 iNow);
+	bool	IsChanging(int64 iNow);
 	float64	GetVelocityRight(void);
 	float64	GetVelocityDown(void);
 };

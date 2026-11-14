@@ -10,6 +10,7 @@
 #include "MouseCanvasDraw.h"
 
 
+#define MOUSE_FRAME_MILLISECONDS	16		//Between frames while the mouse's drawing changes with no input.
 #define MOUSE_MARGIN			16		//Pixels between the mouse and the canvas's sides.
 #define MOUSE_ASPECT			0.6		//The mouse's width over its height.
 #define MOUSE_TOP_RADIUS		0.15	//Of the top corners, as a part of the width.
@@ -63,6 +64,9 @@ void CMouseCanvasDraw::Init(Ptr<CMouse> pMouse, Ptr<CWindowTheme> pTheme)
 	msCelSize.Init(-1, -1);
 	miCelState = 0;
 	msCelArrow.Init(0, 0);
+	mpcCanvas = NULL;
+	mpcWindow = NULL;
+	mbPosted = false;
 
 	PostInit();
 }
@@ -87,6 +91,9 @@ void CMouseCanvasDraw::Class(void)
 	U_2Int32(msCelSize);
 	U_Int32(miCelState);
 	U_2Int32(msCelArrow);
+	U_Pointer(mpcCanvas);
+	U_Pointer(mpcWindow);
+	U_Bool(mbPosted);
 }
 
 
@@ -96,7 +103,23 @@ void CMouseCanvasDraw::Class(void)
 //////////////////////////////////////////////////////////////////////////
 void CMouseCanvasDraw::Free(void)
 {
+	if (mbPosted)
+	{
+		mpcWindow->CancelPosted(this);
+	}
 	CCanvasDraw::Free();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Posted by Draw: the canvas is drawn again at the next paint.
+//
+//////////////////////////////////////////////////////////////////////////
+void CMouseCanvasDraw::NextFrame(void)
+{
+	mbPosted = false;
+	mpcCanvas->Invalidate();
 }
 
 
@@ -155,6 +178,14 @@ bool CMouseCanvasDraw::Draw(Ptr<CCanvas> pCanvas)
 	if ((sSize.x != msCelSize.x) || (sSize.y != msCelSize.y) || (iState != miCelState) || (sArrow.x != msCelArrow.x) || (sArrow.y != msCelArrow.y) || mpCelDraw->GetCel().IsNull())
 	{
 		MakeCel(pCanvas, sSize, iState, sArrow);
+	}
+
+	if (!mbPosted && mpMouse->IsChanging(iNow))
+	{
+		mpcCanvas = &pCanvas;
+		mpcWindow = &pCanvas->GetWindow();
+		mpcWindow->PostAfter(MOUSE_FRAME_MILLISECONDS, this, &CMouseCanvasDraw::NextFrame);
+		mbPosted = true;
 	}
 	return mpCelDraw->Draw(pCanvas);
 }

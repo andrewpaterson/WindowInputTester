@@ -7,6 +7,7 @@
 
 class CImageDraw;
 class CImageColourARGB;
+class CWindow;
 
 
 //Draws a mouse, seen from above, as large as fits in the canvas and centred in it.  Its body is a rounded rectangle
@@ -19,8 +20,11 @@ class CImageColourARGB;
 //
 //The mouse is drawn into a cel the size of the canvas, made again only when the canvas changes size or what the
 //mouse is doing changes (as the arrow does all the time the mouse moves), and an image draw puts the cel on the
-//canvas.  The buttons are read from the window's
-//component input each time it is drawn; while the window isn't active every button is released.
+//canvas.  The buttons are read from the window's component input each time it is drawn; while the window isn't active
+//every button is released.
+//
+//While the arrow fades, or the wheel's arrow is lit, the canvas is drawn again every MOUSE_FRAME_MILLISECONDS with no
+//input (the window's PostAfter), so the arrow goes when the mouse stops.  Then nothing is posted and the window waits.
 class CMouseCanvasDraw : public CCanvasDraw
 {
 CONSTRUCTABLE(CMouseCanvasDraw);
@@ -38,6 +42,9 @@ protected:
 	SInt32Vec2				msCelSize;  //The canvas size the cel was made for, -1, -1 for none yet.
 	int32					miCelState;  //The mouse's state when the cel was made.
 	SInt32Vec2				msCelArrow;  //The motion arrow the cel was made with, in pixels, 0, 0 for none.
+	CCanvas*				mpcCanvas;  //What it last drew, which holds it, and its window: not held.
+	CWindow*				mpcWindow;
+	bool					mbPosted;  //The next frame is posted to mpcWindow.
 
 public:
 	void	Init(Ptr<CMouse> pMouse, Ptr<CWindowTheme> pTheme);
@@ -47,6 +54,7 @@ public:
 	bool	Load(CObjectReader* pcFile) override;
 
 	bool	Draw(Ptr<CCanvas> pCanvas) override;
+	void	NextFrame(void);
 
 protected:
 	void		MakeCel(Ptr<CCanvas> pCanvas, SInt32Vec2 sSize, int32 iState, SInt32Vec2 sArrow);
