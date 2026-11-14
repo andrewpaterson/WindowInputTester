@@ -1,5 +1,6 @@
-# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RenderLib + RasterRenderLib + InputLib + WindowLib + X11Lib + the
+# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RenderLib + RasterRenderLib + VulkanLib + InputLib + WindowLib + X11Lib + the
 # tester's sources).
+# VulkanLib needs Vulkan's headers to build (the SDK, or libvulkan-dev); it loads libvulkan.so.1 when a scene is shown.
 #
 # 64-bit only: there is no 32-bit libX11 installed.  Needs libx11-dev and libxext-dev.
 #
@@ -36,6 +37,7 @@ set(SUPPORTLIB_DIR "${COMMON_DIR}/SupportLib")
 set(RASTERLIB_DIR "${COMMON_DIR}/RasterLib")
 set(RENDERLIB_DIR "${COMMON_DIR}/RenderLib")
 set(RASTERRENDERLIB_DIR "${COMMON_DIR}/RasterRenderLib")
+set(VULKANLIB_DIR "${COMMON_DIR}/VulkanLib")
 set(INPUTLIB_DIR "${COMMON_DIR}/InputLib")
 set(WINDOWLIB_DIR "${COMMON_DIR}/WindowLib")
 set(X11LIB_DIR "${COMMON_DIR}/X11Lib")
@@ -90,6 +92,7 @@ vcxproj_sources(SUPPORTLIB_SOURCES "${SUPPORTLIB_DIR}/SupportLib.vcxproj")
 vcxproj_sources(RASTERLIB_SOURCES "${RASTERLIB_DIR}/RasterLib.vcxproj")
 vcxproj_sources(RENDERLIB_SOURCES "${RENDERLIB_DIR}/RenderLib.vcxproj")
 vcxproj_sources(RASTERRENDERLIB_SOURCES "${RASTERRENDERLIB_DIR}/RasterRenderLib.vcxproj")
+vcxproj_sources(VULKANLIB_SOURCES "${VULKANLIB_DIR}/VulkanLib.vcxproj")
 vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
 vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
@@ -153,6 +156,12 @@ target_link_libraries(RenderLib PUBLIC SupportLib StandardLib BaseLib)
 add_library(RasterRenderLib STATIC ${RASTERRENDERLIB_SOURCES})
 target_link_libraries(RasterRenderLib PUBLIC RenderLib RasterLib SupportLib StandardLib BaseLib)
 
+# Only Vulkan's headers (the SDK or libvulkan-dev): VulkanLib finds its functions in libvulkan.so.1 while it runs.
+find_path(VULKAN_INCLUDE_DIR vulkan/vulkan.h HINTS "$ENV{VULKAN_SDK}/include" REQUIRED)
+add_library(VulkanLib STATIC ${VULKANLIB_SOURCES})
+target_include_directories(VulkanLib PUBLIC "${VULKAN_INCLUDE_DIR}")
+target_link_libraries(VulkanLib PUBLIC RenderLib SupportLib StandardLib BaseLib)
+
 add_library(InputLib STATIC ${INPUTLIB_SOURCES})
 target_link_libraries(InputLib PUBLIC StandardLib BaseLib)
 
@@ -164,4 +173,4 @@ target_link_libraries(X11Lib PUBLIC WindowLib InputLib SupportLib StandardLib Ba
 
 add_executable(WindowInputTester ${TESTER_SOURCES})
 target_include_directories(WindowInputTester PRIVATE "${TESTER_DIR}")
-target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)
+target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib VulkanLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)

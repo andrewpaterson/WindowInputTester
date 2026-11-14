@@ -69,10 +69,10 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir)..\..\CommonLibraries\Libraries\;$(VULKAN_SDK)\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86)</LibraryPath>
@@ -290,6 +290,9 @@
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\RenderLib\RenderLib.vcxproj">
       <Project>{b3f6d2a8-5c41-4e97-9a0d-2e8c7b154f63}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CommonLibraries\Libraries\VulkanLib\VulkanLib.vcxproj">
+      <Project>{6f1c2e9a-4b7d-4c3e-9a51-0d8e7b2f4c16}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\SupportLib\SupportLib.vcxproj">
       <Project>{221022f1-b103-456a-8f55-721f33f2e26d}</Project>
