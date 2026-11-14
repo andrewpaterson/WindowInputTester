@@ -4,20 +4,11 @@
 #include "StandardLib/Objects.h"
 #include "SupportLib/MeshReader.h"
 #include "WindowLib/ComponentInput.h"
-#include "WindowLib/JewelImageGenerator.h"
 #include "WindowLib/Window.h"
 #include "VRMLPage.h"
 
 
 #define VRML_ZOOM_FACTOR	1.1f	//KiCad's, for each roll of the wheel.
-
-
-//Load's Files of Type.
-static SFileChooserType gasVRMLFileTypes[] =
-{
-	{ "VRML Files (*.wrl)", "wrl" },
-	{ "All Files", NULL },
-};
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -26,24 +17,12 @@ static SFileChooserType gasVRMLFileTypes[] =
 //////////////////////////////////////////////////////////////////////////
 void CVRMLPage::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFontColours> pFontColours)
 {
-	CColourFormatHelper		cFormat;
-
 	PreInit();
 
 	CGridContainer::Init(pWindow);
 	SetAlignment(CSH_Stretch, CSV_Stretch);
-	mpsLook = psLook;
-	mszLastFile.Init();
-	mbLoadPending = false;
 	msLastPointer.Init(0, 0);
 	mbMiddleDragged = false;
-
-	pWindow->GetColourFormat(&cFormat);
-	mpFolderIcon = CJewelImageGenerator::CreateFolder(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
-	mpFileIcon = CJewelImageGenerator::CreateFile(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
-
-	mpLoad = OMalloc<CButton>(pWindow, psLook->pcTheme, "Load...");
-	mpLoad->GetClickEvent()->Add(this, &CVRMLPage::LoadClicked);
 
 	mpStatus = OMalloc<CLabel>(pWindow, pFontColours->GetFont(psLook->pcTheme->GetColour(TC_Text)), "No VRML file loaded.");
 	mpStatus->SetAlignment(CSH_Left, CSV_Center);
@@ -56,9 +35,8 @@ void CVRMLPage::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFontColours
 	mpCanvas->AddInputAction(IAF_Wheel, NULL, this, &CVRMLPage::WheelAction);
 	mpCanvas->AddInputAction(IAF_KeyUp, "Button 3", this, &CVRMLPage::MiddleReleasedAction);
 
-	AddComponent(mpLoad, 0, 0, 1, 1, 0, 0);
-	AddComponent(mpStatus, 1, 0, 1, 1, 1, 0);
-	AddComponent(mpCanvas, 0, 1, 2, 1, 1, 1);
+	AddComponent(mpStatus, 0, 0, 1, 1, 1, 0);
+	AddComponent(mpCanvas, 0, 1, 1, 1, 1, 1);
 
 	PostInit();
 }
@@ -72,16 +50,9 @@ void CVRMLPage::Class(void)
 {
 	CGridContainer::Class();
 
-	U_Pointer(mpsLook);
-	M_Pointer(mpLoad);
 	M_Pointer(mpStatus);
 	M_Pointer(mpCanvas);
 	M_Pointer(mpDraw);
-	M_Pointer(mpFolderIcon);
-	M_Pointer(mpFileIcon);
-	M_Pointer(mpChooser);
-	U_String(mszLastFile);
-	U_Bool(mbLoadPending);
 	U_2Int32(msLastPointer);
 	U_Bool(mbMiddleDragged);
 }
@@ -93,49 +64,7 @@ void CVRMLPage::Class(void)
 //////////////////////////////////////////////////////////////////////////
 void CVRMLPage::Free(void)
 {
-	if (mpLoad.IsNotNull())
-	{
-		mpLoad->GetClickEvent()->Remove(this);
-	}
-	mszLastFile.Kill();
 	CGridContainer::Free();
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-//
-//////////////////////////////////////////////////////////////////////////
-void CVRMLPage::LoadClicked(void)
-{
-	mbLoadPending = true;
-}
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-// Called by the window's tick.  Shows the chooser if it was asked for.
-// The chooser starts on the file last chosen.
-//
-//////////////////////////////////////////////////////////////////////////
-void CVRMLPage::ShowDialog(void)
-{
-	char*	szFilename;
-
-	if (!mbLoadPending)
-	{
-		return;
-	}
-	mbLoadPending = false;
-
-	mpChooser = OMalloc<CFileChooser>(GetWindow(), mpsLook, "Load VRML", false, mszLastFile.Text(), gasVRMLFileTypes, sizeof(gasVRMLFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
-	if (mpChooser->Show())
-	{
-		szFilename = mpChooser->GetChosen();
-		mszLastFile.Set(szFilename);
-		LoadVRML(szFilename);
-	}
-	mpChooser = NULL;
 }
 
 
@@ -168,7 +97,6 @@ bool CVRMLPage::LoadVRML(const char* szFilename)
 		szStatus.Append(" triangles, read in ");
 		szStatus.Append((int32)(GetDebugTickCount() - iStart));
 		szStatus.Append(" ms.");
-		GetWindow()->GetFocus()->SetFocus(mpCanvas);
 		mpCanvas->Invalidate();
 	}
 	else
@@ -180,6 +108,18 @@ bool CVRMLPage::LoadVRML(const char* szFilename)
 	szStatus.Kill();
 	szName.Kill();
 	return bResult;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Once the page is in its tab, so the view's mouse and wheel work without
+// clicking it first.
+//
+//////////////////////////////////////////////////////////////////////////
+void CVRMLPage::FocusView(void)
+{
+	GetWindow()->GetFocus()->SetFocus(mpCanvas);
 }
 
 

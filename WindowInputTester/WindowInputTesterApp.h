@@ -17,11 +17,11 @@
 #include "WindowInputTesterTick.h"
 #include "FileMenuListener.h"
 #include "TabNameListener.h"
-#include "VRMLPage.h"
 
 
-//The window input tester: its window (the mouse, the keyboard, an editor and a VRML view in tabs under a menu bar), the menu and
-//tab listeners and the input that drives it.  main makes it, adds it to the root, runs it and removes it from the root.
+//The window input tester: its window (the mouse and the keyboard in a tab under a menu bar, which is the only tab it starts with;
+//File's New and Open add editors and VRML views), the menu and tab listeners and the input that drives it.  main makes it, adds
+//it to the root, runs it and removes it from the root.
 class CWindowInputTesterApp : public CObject
 {
 CONSTRUCTABLE(CWindowInputTesterApp);
@@ -34,7 +34,6 @@ protected:
 	Ptr<CMenuBar>				mpMenuBar;
 	Ptr<CFileMenuListener>		mpFileMenuListener;
 	Ptr<CTabNameListener>		mpTabNameListener;
-	Ptr<CVRMLPage>				mpVRMLPage;
 	SDialogLook					msDialogLook;
 	Ptr<CPasteHistoryDialog>	mpPasteHistory;  //Paste from History (Control+Shift+V): what the clipboard's history chooses with.
 	SWindowInputTesterDialogs	msDialogs;  //The window's tick shows the dialogs the listeners ask for.

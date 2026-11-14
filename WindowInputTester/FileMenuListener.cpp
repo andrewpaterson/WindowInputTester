@@ -9,6 +9,15 @@
 
 
 //Open File's Files of Type.
+static SFileChooserType gasOpenFileTypes[] =
+{
+	{ "Text Files (*.txt)", "txt" },
+	{ "VRML Files (*.wrl)", "wrl" },
+	{ "All Files", NULL },
+};
+
+
+//Save File's.
 static SFileChooserType gasTextFileTypes[] =
 {
 	{ "Text Files (*.txt)", "txt" },
@@ -40,7 +49,7 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	mpFileIcon = CJewelImageGenerator::CreateFile(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
 
 	mpNewEditorTab = pFileMenu->AddItem("New...");
-	mpOpenFile = pFileMenu->AddItem("Load...", mpFileIcon);
+	mpOpenFile = pFileMenu->AddItem("Open...", mpFileIcon);
 	mpSaveFile = pFileMenu->AddItem("Save...");
 
 	PostInit();
@@ -190,26 +199,52 @@ void CFileMenuListener::NewEditorTab(void)
 void CFileMenuListener::OpenFile(void)
 {
 	CFileUtil			cFileUtil;
+	Ptr<CVRMLPage>		pVRML;
 	Ptr<CEditorPage>	pEditor;
-	CChars				szName;
 	char*				szFilename;
 
-	mpChooser = OMalloc<CFileChooser>(mpWindow, mpsLook, "Open File", false, mszLastFile.Text(), gasTextFileTypes, sizeof(gasTextFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
+	mpChooser = OMalloc<CFileChooser>(mpWindow, mpsLook, "Open File", false, mszLastFile.Text(), gasOpenFileTypes, sizeof(gasOpenFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
 	if (mpChooser->Show())
 	{
 		szFilename = mpChooser->GetChosen();
 		mszLastFile.Set(szFilename);
 
-		pEditor = OMalloc<CEditorPage>(mpWindow, mpsLook->pcTheme, mpFontColours, "");
-		if (pEditor->LoadText(szFilename))
+		if (cFileUtil.IsExtension(szFilename, "wrl", true))
 		{
-			szName.Init();
-			cFileUtil.GetFileName(&szName, szFilename);
-			mpTabbed->Select(mpTabbed->AddTab(szName.Text(), pEditor, NULL, true));
-			szName.Kill();
+			pVRML = OMalloc<CVRMLPage>(mpWindow, mpsLook, mpFontColours);
+			if (pVRML->LoadVRML(szFilename))
+			{
+				AddFileTab(szFilename, pVRML);
+				pVRML->FocusView();
+			}
+		}
+		else
+		{
+			pEditor = OMalloc<CEditorPage>(mpWindow, mpsLook->pcTheme, mpFontColours, "");
+			if (pEditor->LoadText(szFilename))
+			{
+				AddFileTab(szFilename, pEditor);
+			}
 		}
 	}
 	mpChooser = NULL;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// A closable tab named after the file, which is selected.
+//
+//////////////////////////////////////////////////////////////////////////
+void CFileMenuListener::AddFileTab(const char* szFilename, Ptr<CComponent> pPage)
+{
+	CFileUtil	cFileUtil;
+	CChars		szName;
+
+	szName.Init();
+	cFileUtil.GetFileName(&szName, szFilename);
+	mpTabbed->Select(mpTabbed->AddTab(szName.Text(), pPage, NULL, true));
+	szName.Kill();
 }
 
 
