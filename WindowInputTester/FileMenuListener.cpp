@@ -1,9 +1,12 @@
+#include <string.h>
 #include "BaseLib/FileUtil.h"
+#include "BaseLib/LogToMemory.h"
 #include "StandardLib/Objects.h"
 #include "StandardLib/ObjectReader.h"
 #include "StandardLib/ObjectWriter.h"
 #include "WindowLib/FileChooser.h"
 #include "WindowLib/JewelImageGenerator.h"
+#include "WindowLib/MessageDialog.h"
 #include "InputPage.h"
 #include "TabNameListener.h"
 #include "FileMenuListener.h"
@@ -238,16 +241,21 @@ void CFileMenuListener::NewEditorTab(void)
 //////////////////////////////////////////////////////////////////////////
 //
 // The chooser starts on the file last opened or saved.  A file that can't
-// be read adds no tab.
+// be read adds no tab, and says why in a message: what the reader logged,
+// which isn't logged as an error, as a debug build would stop at it.
 //
 //////////////////////////////////////////////////////////////////////////
 void CFileMenuListener::OpenFile(void)
 {
 	CFileUtil			cFileUtil;
+	CLogToMemory		cLog;
 	Ptr<CScenePage>		pScene;
 	Ptr<CVRMLPage>		pVRML;
 	Ptr<CEditorPage>	pEditor;
 	char*				szFilename;
+	const char*			szWhat;
+	char				szLog[4096];
+	bool				bRead;
 
 	mpChooser = OMalloc<CFileChooser>(mpWindow, mpsLook, "Open File", false, mszLastFile.Text(), gasOpenFileTypes, sizeof(gasOpenFileTypes) / sizeof(SFileChooserType), mpFolderIcon, mpFileIcon);
 	if (mpChooser->Show())
@@ -255,34 +263,104 @@ void CFileMenuListener::OpenFile(void)
 		szFilename = mpChooser->GetChosen();
 		mszLastFile.Set(szFilename);
 
+		cLog.Start(true);
 		if (cFileUtil.IsExtension(szFilename, "drg", true))
 		{
+			szWhat = "a scene file.  Old Dragon files have to be converted to scene files first";
 			pScene = OMalloc<CScenePage>(mpWindow, mpsLook, mpFontColours);
-			if (pScene->ReadScene(szFilename))
-			{
-				AddFileTab(szFilename, pScene);
-				pScene->FocusView();
-			}
+			bRead = pScene->ReadScene(szFilename);
 		}
 		else if (cFileUtil.IsExtension(szFilename, "wrl", true))
 		{
+			szWhat = "VRML";
 			pVRML = OMalloc<CVRMLPage>(mpWindow, mpsLook, mpFontColours);
-			if (pVRML->LoadVRML(szFilename))
-			{
-				AddFileTab(szFilename, pVRML);
-				pVRML->FocusView();
-			}
+			bRead = pVRML->LoadVRML(szFilename);
 		}
 		else
 		{
+			szWhat = "text";
 			pEditor = OMalloc<CEditorPage>(mpWindow, mpsLook->pcTheme, mpFontColours, "");
-			if (pEditor->LoadText(szFilename))
-			{
-				AddFileTab(szFilename, pEditor);
-			}
+			bRead = pEditor->LoadText(szFilename);
+		}
+		cLog.Stop(szLog, sizeof(szLog));
+
+		if (!bRead)
+		{
+			ReportUnreadable(szFilename, szWhat, szLog);
+		}
+		else if (pScene.IsNotNull())
+		{
+			AddFileTab(szFilename, pScene);
+			pScene->FocusView();
+		}
+		else if (pVRML.IsNotNull())
+		{
+			AddFileTab(szFilename, pVRML);
+			pVRML->FocusView();
+		}
+		else
+		{
+			AddFileTab(szFilename, pEditor);
 		}
 	}
 	mpChooser = NULL;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Says the file couldn't be read as szWhat, with each line szLog has under
+// it: the reason a reader logged, without where in the code it was.
+//
+//////////////////////////////////////////////////////////////////////////
+void CFileMenuListener::ReportUnreadable(const char* szFilename, const char* szWhat, char* szLog)
+{
+	Ptr<CMessageDialog>	pMessage;
+	CFileUtil			cFileUtil;
+	CChars				szMessage;
+	CChars				szName;
+	char*				szLine;
+	char*				szEnd;
+	char*				szReason;
+
+	szName.Init();
+	cFileUtil.GetFileName(&szName, szFilename);
+	szMessage.Init(szName.Text());
+	szMessage.Append(" couldn't be read as ");
+	szMessage.Append(szWhat);
+	szMessage.Append(".");
+	pMessage = OMalloc<CMessageDialog>(mpWindow, mpsLook, "Can't Open File", szMessage.Text());
+	pMessage->GetDialog()->SetCancelCaption(NULL);
+	szMessage.Kill();
+	szName.Kill();
+
+	for (szLine = szLog; *szLine != 0; szLine = szEnd)
+	{
+		szEnd = strchr(szLine, '\n');
+		if (szEnd == NULL)
+		{
+			szEnd = szLine + strlen(szLine);
+		}
+		else
+		{
+			*szEnd = 0;
+			szEnd++;
+		}
+
+		//"ERROR: (File.cpp:12) bool __cdecl CClass::Method(const char *) Why." is "Why."
+		szReason = szLine;
+		if (strncmp(szReason, "ERROR: (", 8) == 0)
+		{
+			szReason = strstr(szReason, ") ");
+			szReason = (szReason != NULL) ? strstr(szReason + 2, ") ") : NULL;
+			szReason = (szReason != NULL) ? szReason + 2 : szLine;
+		}
+		if ((*szReason != 0) && (*szReason != '\r'))
+		{
+			pMessage->AddItem(szReason);
+		}
+	}
+	pMessage->Show();
 }
 
 
