@@ -55,6 +55,7 @@ void CFileMenuListener::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFon
 	mpKeyboardIcon = CJewelImageGenerator::CreateKeyboard(psLook->pcTheme->GetColour(TC_Icon), &cFormat);
 
 	mpInputTester = pFileMenu->AddItem("Input Tester", mpKeyboardIcon);
+	mpIsosurface = pFileMenu->AddItem("Isosurface");
 	pFileMenu->AddSeparator();
 	mpNewEditorTab = pFileMenu->AddItem("New...");
 	mpOpenFile = pFileMenu->AddItem("Open...", mpFileIcon);
@@ -75,6 +76,7 @@ void CFileMenuListener::Class(void)
 	M_Pointer(mpFontColours);
 	M_Pointer(mpTabbed);
 	M_Pointer(mpInputTester);
+	M_Pointer(mpIsosurface);
 	M_Pointer(mpNewEditorTab);
 	M_Pointer(mpOpenFile);
 	M_Pointer(mpSaveFile);
@@ -142,6 +144,10 @@ void CFileMenuListener::MenuItemClicked(CMenuItem* pcItem)
 	{
 		meDialog = FMD_InputTester;
 	}
+	else if (&mpIsosurface == pcItem)
+	{
+		meDialog = FMD_Isosurface;
+	}
 	else if (&mpNewEditorTab == pcItem)
 	{
 		meDialog = FMD_NewEditorTab;
@@ -171,6 +177,10 @@ void CFileMenuListener::ShowDialog(void)
 	if (eDialog == FMD_InputTester)
 	{
 		OpenInputTester();
+	}
+	else if (eDialog == FMD_Isosurface)
+	{
+		OpenIsosurface();
 	}
 	else if (eDialog == FMD_NewEditorTab)
 	{
@@ -214,6 +224,21 @@ void CFileMenuListener::OpenInputTester(void)
 	}
 	mpTabbed->Select(pTab);
 	mpWindow->GetFocus()->SetFocus(pPage);
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// A new one each time: each has its own spheres.
+//
+//////////////////////////////////////////////////////////////////////////
+void CFileMenuListener::OpenIsosurface(void)
+{
+	Ptr<CIsosurfacePage>	pPage;
+
+	pPage = OMalloc<CIsosurfacePage>(mpWindow, mpsLook, mpFontColours);
+	mpTabbed->Select(mpTabbed->AddTab("Isosurface", pPage, NULL, true));
+	pPage->FocusView();
 }
 
 

@@ -177,15 +177,32 @@ bool CSceneCanvasDraw::Load(CObjectReader* pcFile)
 bool CSceneCanvasDraw::ReadScene(const char* szFilename)
 {
 	CFileUtil	cFileUtil;
+	Ptr<CScene>	pScene;
+	CChars		szName;
 
-	mpScene = OMalloc<CScene>();
-	if (!mpScene->ReadFile(szFilename))
+	pScene = OMalloc<CScene>();
+	if (!pScene->ReadFile(szFilename))
 	{
-		mpScene = NULL;
 		return false;
 	}
-	mszName.ReInit();
-	cFileUtil.GetFileName(&mszName, szFilename);
+	szName.Init();
+	cFileUtil.GetFileName(&szName, szFilename);
+	SetScene(pScene, szName.Text());
+	szName.Kill();
+	return true;
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// A scene made rather than read: its view starts as a read one's does,
+// from its first camera or framed on it.
+//
+//////////////////////////////////////////////////////////////////////////
+void CSceneCanvasDraw::SetScene(Ptr<CScene> pScene, const char* szName)
+{
+	mpScene = pScene;
+	mszName.Set(szName);
 
 	MakePlayers();
 	Advance(0);
@@ -199,6 +216,68 @@ bool CSceneCanvasDraw::ReadScene(const char* szFilename)
 		mpVulkanFrame = OMalloc<CVulkanFrame>(OMalloc<CRenderScene>(mpScene, &mcVulkanFactory, mpVulkanRenderer), mpCamera);
 	}
 	SetStatus();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// What the status calls the scene, and that it changed: its meshes'
+// editors' counters say what to make again, and the canvas is drawn again.
+//
+//////////////////////////////////////////////////////////////////////////
+void CSceneCanvasDraw::SceneChanged(const char* szName)
+{
+	mszName.Set(szName);
+	SetStatus();
+	Changed();
+}
+
+
+//////////////////////////////////////////////////////////////////////////
+//
+// Where the ray through the canvas point x, y (from its top left) meets
+// the plane through the view's target facing the view: the plane of the
+// screen.  The focal length is as both renderers have it, half the width
+// over the tangent of half the field of view.  False before the canvas
+// has been drawn, or if the ray runs along the plane.
+//
+//////////////////////////////////////////////////////////////////////////
+bool CSceneCanvasDraw::ScreenToPlane(int32 x, int32 y, SFloat32Vec3* psDest)
+{
+	SFloat4x4*		psWorld;
+	SFloat32Vec3	sRight;
+	SFloat32Vec3	sUp;
+	SFloat32Vec3	sBack;
+	SFloat32Vec3	sEye;
+	SFloat32Vec3	sRay;
+	SFloat32Vec3	sToTarget;
+	float32			fFocal;
+	float32			fAlong;
+	float32			fT;
+
+	if ((msSize.x <= 0) || (msSize.y <= 0) || (mpCamera->mfFOV <= 0.0f))
+	{
+		return false;
+	}
+
+	PlaceCamera();
+	psWorld = &mpCamera->mpConnection->msWorldMatrix;
+	sRight.Init(psWorld->x.x, psWorld->x.y, psWorld->x.z);
+	sUp.Init(psWorld->y.x, psWorld->y.y, psWorld->y.z);
+	sBack.Init(psWorld->z.x, psWorld->z.y, psWorld->z.z);
+	sEye.Init(psWorld->pos.x, psWorld->pos.y, psWorld->pos.z);
+
+	fFocal = ((float32)msSize.x * 0.5f) / tanf(mpCamera->mfFOV * 0.5f);
+	sRay = (sRight * ((float32)x + 0.5f - ((float32)msSize.x * 0.5f))) + (sUp * (((float32)msSize.y * 0.5f) - (float32)y - 0.5f)) - (sBack * fFocal);
+
+	fAlong = Float32Vec3Dot(&sRay, &sBack);
+	if (fAlong == 0.0f)
+	{
+		return false;
+	}
+	sToTarget = msTarget - sEye;
+	fT = Float32Vec3Dot(&sToTarget, &sBack) / fAlong;
+	*psDest = sEye + (sRay * fT);
 	return true;
 }
 

@@ -58,6 +58,9 @@
     <ClCompile Include="ShapeKeyDraw.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="IsosurfacePage.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowInputTesterApp.h">
@@ -112,6 +115,9 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="ShapeKeyDraw.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="IsosurfacePage.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

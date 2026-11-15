@@ -35,6 +35,9 @@ class CWindow;
 //puts the view back where its camera, or the framed view, started it.
 //
 //The status label, which the page holds, says what's drawn and how; it's set outside the paint.
+//
+//SetScene draws a scene made rather than read; SceneChanged says it changed, and ScreenToPlane is where a point on the canvas is
+//on the plane of the screen through what the view turns about.
 class CSceneCanvasDraw : public CCanvasDraw
 {
 CONSTRUCTABLE(CSceneCanvasDraw);
@@ -89,6 +92,9 @@ public:
 	bool		Load(CObjectReader* pcFile) override;
 
 	bool		ReadScene(const char* szFilename);
+	void		SetScene(Ptr<CScene> pScene, const char* szName);
+	void		SceneChanged(const char* szName);
+	bool		ScreenToPlane(int32 x, int32 y, SFloat32Vec3* psDest);
 	bool		Draw(Ptr<CCanvas> pCanvas) override;
 	void		NextFrame(void);
 
