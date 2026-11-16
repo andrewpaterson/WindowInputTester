@@ -127,6 +127,11 @@ void CIsosurfacePage::MakeScene(void)
 	mpUnwrap = mpEditor->AddModifier<CMeshUnwrap>(ISOSURFACE_TEXELS_PER_UNIT);
 	mpBake = mpEditor->AddModifier<CMeshBake>(OMalloc<CSolidChecker>(ISOSURFACE_CHECKER_SIZE, Set32BitColour((uint8)230, (uint8)220, (uint8)200), Set32BitColour((uint8)60, (uint8)90, (uint8)150)));
 
+	//A checker averages itself over a texel exactly and has no height, so one sample a texel is all of it: the spheres are
+	//baked again at every click.
+	mpBake->miSamples = 1;
+	mpBake->mfRelief = 0.0f;
+
 	mpDraw->SetScene(mpScene, "Isosurface: no spheres");
 }
 
