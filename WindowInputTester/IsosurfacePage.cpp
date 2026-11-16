@@ -5,6 +5,7 @@
 #include "SupportLib/Camera.h"
 #include "SupportLib/Instance.h"
 #include "SupportLib/ShapeSmoothUnion.h"
+#include "SupportLib/SolidChecker.h"
 #include "SupportLib/Sphere.h"
 #include "WindowLib/ComponentInput.h"
 #include "WindowLib/Window.h"
@@ -77,6 +78,8 @@ void CIsosurfacePage::Class(void)
 	M_Pointer(mpEditor);
 	M_Pointer(mpShapeEditor);
 	M_Pointer(mpShapeNormals);
+	M_Pointer(mpUnwrap);
+	M_Pointer(mpBake);
 	M_Pointer(mpShape);
 	U_SInt(miSpheres);
 	U_Bool(mbInScene);
@@ -100,7 +103,8 @@ void CIsosurfacePage::Free(void)
 //
 // A camera ten from the origin along z, looking back along -z, so the
 // plane of the screen starts as z = 0, and an editor whose stack meshes
-// the spheres and gives them the shape's normals, so they're smooth.  The editor's instance goes in with the first sphere: until
+// the spheres, gives them the shape's normals (so they're smooth),
+// unwraps them and bakes a checker onto them.  The editor's instance goes in with the first sphere: until
 // then there's nothing to draw.
 //
 //////////////////////////////////////////////////////////////////////////
@@ -120,6 +124,8 @@ void CIsosurfacePage::MakeScene(void)
 	mpEditor = OMalloc<CMeshEditor>(OMalloc<CMesh>());
 	mpShapeEditor = mpEditor->AddModifier<CMeshShapeEditor>(Ptr<CShape>(), ISOSURFACE_SMALLEST_CELL, ISOSURFACE_LARGEST_CELL);
 	mpShapeNormals = mpEditor->AddModifier<CMeshShapeNormals>(Ptr<CShape>());
+	mpUnwrap = mpEditor->AddModifier<CMeshUnwrap>(ISOSURFACE_TEXELS_PER_UNIT);
+	mpBake = mpEditor->AddModifier<CMeshBake>(OMalloc<CSolidChecker>(ISOSURFACE_CHECKER_SIZE, Set32BitColour((uint8)230, (uint8)220, (uint8)200), Set32BitColour((uint8)60, (uint8)90, (uint8)150)));
 
 	mpDraw->SetScene(mpScene, "Isosurface: no spheres");
 }
