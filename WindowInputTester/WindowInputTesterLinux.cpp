@@ -1,4 +1,5 @@
 #include "BaseLib/GlobalMemory.h"
+#include "StandardLib/Objects.h"
 #include "X11Lib/X11WindowFactory.h"
 #include "X11Lib/X11Input.h"
 #include "WindowInputTesterApp.h"
@@ -17,21 +18,25 @@ int main(int argc, char* argv[])
 	InitWindowInputTesterGlobals();
 
 	{
-		CX11WindowFactory	cNativeFactory;
-		CX11Input			cX11Input;
+		Ptr<CX11WindowFactory>	pNativeFactory;
+		CX11Input				cX11Input;
 
-		bResult = cNativeFactory.Init(&gcMemoryAllocator, NULL);
+		//Rooted while the tester runs.  Its windows hold it too, so it's freed after the last of them.
+		pNativeFactory = OMalloc<CX11WindowFactory>(&gcMemoryAllocator, (const char*)NULL);
+		ORoot()->Add(pNativeFactory);
+		bResult = pNativeFactory->IsOpen();
 		if (bResult)
 		{
 			cX11Input.Init();
-			cNativeFactory.SetInput(&cX11Input);
+			pNativeFactory->SetInput(&cX11Input);
 
-			bResult = RunWindowInputTesterApp(&cNativeFactory, &cX11Input, "../../CommonLibraries/Libraries/WinInputLib/xml");
+			bResult = RunWindowInputTesterApp(&pNativeFactory, &cX11Input, "../../CommonLibraries/Libraries/WinInputLib/xml");
 
-			cNativeFactory.SetInput(NULL);
+			pNativeFactory->SetInput(NULL);
 			cX11Input.Kill();
 		}
-		cNativeFactory.Kill();
+		ORoot()->Remove(pNativeFactory);
+		pNativeFactory = NULL;
 	}
 
 	KillWindowInputTesterGlobals();

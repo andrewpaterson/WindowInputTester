@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "BaseLib/LeakDetector.h"
 #include "BaseLib/GlobalMemory.h"
+#include "StandardLib/Objects.h"
 #include "WinGdiLib/WinGDIWindowFactory.h"
 #include "WinInputLib/WinInput.h"
 #include "WindowInputTesterApp.h"
@@ -18,20 +19,23 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	InitWindowInputTesterGlobals();
 
 	{
-		CWinGDIWindowFactory	cNativeFactory;
-		CWinInput				cWinInput;
+		Ptr<CWinGDIWindowFactory>	pNativeFactory;
+		CWinInput					cWinInput;
 
-		cNativeFactory.Init(&gcMemoryAllocator, hInstance, hPrevInstance, nCmdShow, "WindowInputTester");
+		//Rooted while the tester runs.  Its windows hold it too, so it's freed after the last of them.
+		pNativeFactory = OMalloc<CWinGDIWindowFactory>(&gcMemoryAllocator, hInstance, hPrevInstance, nCmdShow, "WindowInputTester");
+		ORoot()->Add(pNativeFactory);
 
 		//The app's input reads the devices from the XML, then adds these.
 		cWinInput.Init(NULL, false);
-		cNativeFactory.SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
+		pNativeFactory->SetRawInput(WinRawInputCallback, cWinInput.GetRaw());
 
-		bResult = RunWindowInputTesterApp(&cNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml");
+		bResult = RunWindowInputTesterApp(&pNativeFactory, &cWinInput, "../../CommonLibraries/Libraries/WinInputLib/xml");
 
-		cNativeFactory.SetRawInput(NULL, NULL);
+		pNativeFactory->SetRawInput(NULL, NULL);
 		cWinInput.Kill();
-		cNativeFactory.Kill();
+		ORoot()->Remove(pNativeFactory);
+		pNativeFactory = NULL;
 	}
 
 	KillWindowInputTesterGlobals();
