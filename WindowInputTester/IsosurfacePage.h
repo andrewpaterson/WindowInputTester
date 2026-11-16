@@ -19,7 +19,7 @@
 #define ISOSURFACE_BLEND_RADIUS		0.5f	//How far the smooth union fills the seams between spheres.
 #define ISOSURFACE_SMALLEST_CELL	0.05f	//The isosurface octree's cells, smallest
 #define ISOSURFACE_LARGEST_CELL		0.8f	//and largest.
-#define ISOSURFACE_TEXELS_PER_UNIT	64.0f	//The baked texture's density.
+#define ISOSURFACE_TEXELS_PER_UNIT	128.0f	//The baked texture's density.
 #define ISOSURFACE_CHECKER_SIZE		0.25f	//The checker's cubes, in world units.
 #define ISOSURFACE_CLICK_PIXELS		4		//How far the pointer may move between pressing and letting go of the left button for a click.
 
