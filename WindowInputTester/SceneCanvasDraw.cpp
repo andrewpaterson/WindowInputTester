@@ -42,6 +42,7 @@ void CSceneCanvasDraw::Init(Ptr<CWindowTheme> pTheme, CLabel* pcStatus)
 
 	mcVulkanFactory.Init();
 	mcRasteriser.Init();
+	mcRasteriser.SetFilter(RF_Bilinear);
 	memset(&mcTarget, 0, sizeof(mcTarget));
 	mbRasterFactory = false;
 	mbVulkan = true;

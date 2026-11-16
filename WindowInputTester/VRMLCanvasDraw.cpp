@@ -20,6 +20,7 @@ void CVRMLCanvasDraw::Init(Ptr<CWindowTheme> pTheme)
 	mpMesh = OMalloc<CRasterMesh>();
 	mcCamera.Init();
 	mcRasteriser.Init();
+	mcRasteriser.SetFilter(RF_Bilinear);
 	mcTarget.mpiDepths = NULL;
 	sColour = pTheme->GetColour(TC_Editor);
 	muiBackground = 0xFF000000 | ((uint32)Get8BitRedColour(sColour) << 16) | ((uint32)Get8BitGreenColour(sColour) << 8) | (uint32)Get8BitBlueColour(sColour);
