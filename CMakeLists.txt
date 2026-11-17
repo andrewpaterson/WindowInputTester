@@ -1,4 +1,4 @@
-# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RenderLib + RasterRenderLib + VulkanLib + ProceduralLib + InputLib + WindowLib + X11Lib + the
+# Linux build of the window input tester (BaseLib + StandardLib + SupportLib + RasterLib + RenderLib + RasterRenderLib + VulkanLib + SceneViewLib + ProceduralLib + InputLib + WindowLib + X11Lib + the
 # tester's sources).
 # VulkanLib needs Vulkan's headers to build (the SDK, or libvulkan-dev); it loads libvulkan.so.1 when a scene is shown.
 #
@@ -42,6 +42,7 @@ set(PROCEDURALLIB_DIR "${COMMON_DIR}/ProceduralLib")
 set(INPUTLIB_DIR "${COMMON_DIR}/InputLib")
 set(WINDOWLIB_DIR "${COMMON_DIR}/WindowLib")
 set(X11LIB_DIR "${COMMON_DIR}/X11Lib")
+set(SCENEVIEWLIB_DIR "${COMMON_DIR}/SceneViewLib")
 set(TESTER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/WindowInputTester")
 
 
@@ -98,6 +99,7 @@ vcxproj_sources(PROCEDURALLIB_SOURCES "${PROCEDURALLIB_DIR}/ProceduralLib.vcxpro
 vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
 vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
+vcxproj_sources(SCENEVIEWLIB_SOURCES "${SCENEVIEWLIB_DIR}/SceneViewLib.vcxproj")
 vcxproj_sources(TESTER_SOURCES "${TESTER_DIR}/WindowInputTester.vcxproj" EXCLUDE "WindowInputTester.cpp")
 list(APPEND TESTER_SOURCES "${TESTER_DIR}/WindowInputTesterLinux.cpp")
 
@@ -176,6 +178,9 @@ target_link_libraries(WindowLib PUBLIC InputLib SupportLib StandardLib BaseLib)
 add_library(X11Lib STATIC ${X11LIB_SOURCES})
 target_link_libraries(X11Lib PUBLIC WindowLib InputLib SupportLib StandardLib BaseLib X11::X11 X11::Xext)
 
+add_library(SceneViewLib STATIC ${SCENEVIEWLIB_SOURCES})
+target_link_libraries(SceneViewLib PUBLIC WindowLib InputLib VulkanLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)
+
 add_executable(WindowInputTester ${TESTER_SOURCES})
 target_include_directories(WindowInputTester PRIVATE "${TESTER_DIR}")
-target_link_libraries(WindowInputTester PRIVATE X11Lib WindowLib InputLib VulkanLib ProceduralLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)
+target_link_libraries(WindowInputTester PRIVATE X11Lib SceneViewLib WindowLib InputLib VulkanLib ProceduralLib RasterRenderLib RenderLib RasterLib SupportLib StandardLib BaseLib)

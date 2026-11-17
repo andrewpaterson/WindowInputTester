@@ -12,7 +12,7 @@
 #include "SupportLib/MeshUnwrap.h"
 #include "SupportLib/MeshBake.h"
 #include "ProceduralLib/MeshShapeNormals.h"
-#include "SceneCanvasDraw.h"
+#include "SceneViewLib/SceneCanvasDraw.h"
 
 
 #define ISOSURFACE_SPHERE_RADIUS	1.0f	//Of each sphere dropped.
