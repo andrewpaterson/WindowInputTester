@@ -20,13 +20,16 @@ void CScenePage::Init(Ptr<CWindow> pWindow, SDialogLook* psLook, Ptr<CFontColour
 
 	mpStatus = OMalloc<CLabel>(pWindow, pFontColours->GetFont(psLook->pcTheme->GetColour(TC_Text)), "No scene read.");
 	mpStatus->SetAlignment(CSH_Left, CSV_Center);
+	mpHelp = OMalloc<CLabel>(pWindow, pFontColours->GetFont(psLook->pcTheme->GetColour(TC_Icon)), "Drag to turn, middle or right drag to pan, wheel to zoom.  Space pauses, R renderer, C and Shift+C change camera, Home view.");
+	mpHelp->SetAlignment(CSH_Left, CSV_Center);
 
 	mpView = OMalloc<CSceneView>(pWindow, psLook->pcTheme, &mpStatus, SVB_LeftTurns);
 	mpView->AddInputAction(IAF_KeyDown, "Space", this, &CScenePage::SpaceAction);
 	mpView->AddInputAction(IAF_KeyDown, "C", this, &CScenePage::CameraAction);
 
 	AddComponent(mpStatus, 0, 0, 1, 1, 1, 0);
-	AddComponent(mpView, 0, 1, 1, 1, 1, 1);
+	AddComponent(mpHelp, 0, 1, 1, 1, 1, 0);
+	AddComponent(mpView, 0, 2, 1, 1, 1, 1);
 
 	PostInit();
 }
@@ -41,6 +44,7 @@ void CScenePage::Class(void)
 	CGridContainer::Class();
 
 	M_Pointer(mpStatus);
+	M_Pointer(mpHelp);
 	M_Pointer(mpView);
 }
 

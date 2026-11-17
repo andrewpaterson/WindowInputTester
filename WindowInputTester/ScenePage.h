@@ -7,7 +7,7 @@
 #include "SceneViewLib/SceneView.h"
 
 
-//A scene tab's page, which File's Open makes from a scene file: what's drawn and how along the top, over a view of the scene
+//A scene tab's page, which File's Open makes from a scene file: what's drawn and how, and its keys, along the top, over a view of the scene
 //(SceneViewLib's CSceneView, drawn by Vulkan or the rasteriser).  The left button's drag turns the view about what it
 //looks at, the middle or right button's drag pans, the wheel zooms, R switches between Vulkan and the rasteriser and Home
 //puts the view back where its camera started it: those are the view's.  The page adds Space, which pauses and plays the
@@ -18,6 +18,7 @@ CONSTRUCTABLE(CScenePage);
 DESTRUCTABLE(CScenePage);
 protected:
 	Ptr<CLabel>			mpStatus;
+	Ptr<CLabel>			mpHelp;
 	Ptr<CSceneView>		mpView;
 
 public:
