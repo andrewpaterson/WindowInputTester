@@ -8,7 +8,6 @@
 #include "WindowLib/FileChooser.h"
 #include "EditorPage.h"
 #include "ScenePage.h"
-#include "IsosurfacePage.h"
 #include "VRMLPage.h"
 
 
@@ -16,7 +15,6 @@ enum EFileMenuDialog
 {
 	FMD_None,
 	FMD_InputTester,
-	FMD_Isosurface,
 	FMD_NewEditorTab,
 	FMD_OpenFile,
 	FMD_SaveFile,
@@ -24,8 +22,7 @@ enum EFileMenuDialog
 
 
 //The File menu.  Input Tester adds a closable Input tab, or selects it if it's already open, and focusses its page so the
-//keys go to it.  Isosurface adds a closable tab of spheres dropped onto the screen and meshed as one isosurface
-//(CIsosurfacePage), which is selected and focussed.  New Editor Tab asks for a name with AskTabName and adds a closable editor tab with it, which is
+//keys go to it.  New Editor Tab asks for a name with AskTabName and adds a closable editor tab with it, which is
 //selected; Cancel, or an empty name, adds nothing.  Open File asks for a file with a CFileChooser and loads it into a new
 //closable tab named after the file, which is selected: a scene drawn by Vulkan for a .drg file, a VRML view for a .wrl file
 //and an editor for any other.  A file that can't be read adds no tab, and a message says why.  Save File asks for a file to save the selected editor
@@ -43,7 +40,6 @@ protected:
 	Ptr<CFontColours>		mpFontColours;
 	Ptr<CTabbedContainer>	mpTabbed;
 	Ptr<CMenuItem>			mpInputTester;
-	Ptr<CMenuItem>			mpIsosurface;
 	Ptr<CMenuItem>			mpNewEditorTab;
 	Ptr<CMenuItem>			mpOpenFile;
 	Ptr<CMenuItem>			mpSaveFile;
@@ -69,7 +65,6 @@ public:
 
 protected:
 	void					OpenInputTester(void);
-	void					OpenIsosurface(void);
 	void					NewEditorTab(void);
 	void					OpenFile(void);
 	void					AddFileTab(const char* szFilename, Ptr<CComponent> pPage);

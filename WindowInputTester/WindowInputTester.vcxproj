@@ -254,7 +254,6 @@
     <ClCompile Include="KeyDraw.cpp" />
     <ClCompile Include="TextKeyDraw.cpp" />
     <ClCompile Include="ShapeKeyDraw.cpp" />
-    <ClCompile Include="IsosurfacePage.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WindowInputTesterApp.h" />
@@ -274,7 +273,6 @@
     <ClInclude Include="KeyDraw.h" />
     <ClInclude Include="TextKeyDraw.h" />
     <ClInclude Include="ShapeKeyDraw.h" />
-    <ClInclude Include="IsosurfacePage.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\BaseLib\BaseLib.vcxproj">
@@ -285,9 +283,6 @@
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\StandardLib\StandardLib.vcxproj">
       <Project>{2cfa23fa-6565-4744-8b75-9790b21cc0e5}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CommonLibraries\Libraries\ProceduralLib\ProceduralLib.vcxproj">
-      <Project>{9878aeff-411b-415e-995b-ba59059726e1}</Project>
     </ProjectReference>
     <ProjectReference Include="..\..\CommonLibraries\Libraries\RasterLib\RasterLib.vcxproj">
       <Project>{2e428e10-c931-4778-b914-ff2e90163de5}</Project>
