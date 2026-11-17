@@ -4,9 +4,6 @@
 #include "BaseLib/GlobalMemory.h"
 #include "BaseLib/GlobalDataTypesIO.h"
 #include "StandardLib/Objects.h"
-#include "SupportLib/ImageColour.h"
-#include "SupportLib/ImageColourConverter.h"
-#include "SupportLib/TrueTypeFont.h"
 #include "SupportLib/TrueTypeFontFactory.h"
 #include "WindowLib/ClearCanvasDraw.h"
 #include "WindowLib/GridContainer.h"
@@ -14,58 +11,6 @@
 #include "WindowLib/JewelTheme.h"
 #include "WindowLib/Clipboard.h"
 #include "WindowInputTesterApp.h"
-
-
-#define WINDOW_INPUT_TESTER_FONT_CHARACTERS	" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-
-
-//////////////////////////////////////////////////////////////////////////
-//
-// Rasterises the glyphs from the TrueType font in white into an image in
-// the window's colour order and makes a font from them.
-//
-//////////////////////////////////////////////////////////////////////////
-Ptr<CFont> GenerateFont(const char* szFontFilename, const char* szName, float32 fPixelSize, EColourOrder eOrder)
-{
-	CTrueTypeFont			cTrueTypeFont;
-	CTrueTypeFontFactory	cFactory;
-	CImageColourRGB			cColour;
-	CChars					szCharacters;
-	Ptr<CFontDescription>	pDescription;
-	Ptr<CImage>				pImage;
-	Ptr<CFont>				pFont;
-
-	cTrueTypeFont.Init();
-	if (!cTrueTypeFont.Load((char*)szFontFilename))
-	{
-		cTrueTypeFont.Kill();
-		gcLogger.Error2(__METHOD__, " Could not load font [", szFontFilename, "].", NULL);
-		return NULL;
-	}
-
-	cColour.Init(1.0f, 1.0f, 1.0f);
-	szCharacters.Init(WINDOW_INPUT_TESTER_FONT_CHARACTERS);
-	cFactory.Init(&cTrueTypeFont, fPixelSize);
-	pDescription = cFactory.Describe((char*)szName, szCharacters.Text());
-	pImage = cFactory.Rasterise(pDescription, &cColour);
-	if (pImage.IsNotNull())
-	{
-		if (pImage->GetColourOrder() != eOrder)
-		{
-			pImage = CImageColourConverter::ConvertColour(pImage, eOrder);
-		}
-		pFont = OMalloc<CFont>(pDescription, pImage);
-	}
-	cFactory.Kill();
-	szCharacters.Kill();
-	cTrueTypeFont.Kill();
-
-	if (pFont.IsNull())
-	{
-		gcLogger.Error2(__METHOD__, " Could not make a font from [", szFontFilename, "].", NULL);
-	}
-	return pFont;
-}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -112,7 +57,7 @@ bool CWindowInputTesterApp::Setup(CNativeWindowFactory* pcNativeFactory, CNative
 	mpWindow->SetVerifyRedraw(getenv("WINDOW_INPUT_TESTER_VERIFY_REDRAW") != NULL);
 
 	//The font is white and coloured as it is drawn.
-	pWhite = GenerateFont("Resources/InterVariable.ttf", "Inter 13px", 13.0f, mpWindow->GetColourOrder());
+	pWhite = ReadTrueTypeFont("Resources/InterVariable.ttf", "Inter 13px", 13.0f, mpWindow->GetColourOrder());
 	mbValid = pWhite.IsNotNull();
 	if (mbValid)
 	{
