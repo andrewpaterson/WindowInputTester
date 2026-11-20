@@ -252,7 +252,7 @@ void CFileMenuListener::OpenFile(void)
 	Ptr<CScenePage>		pScene;
 	Ptr<CVRMLPage>		pVRML;
 	Ptr<CEditorPage>	pEditor;
-	char*				szFilename;
+	const char*			szFilename;
 	const char*			szWhat;
 	char				szLog[4096];
 	bool				bRead;
@@ -394,7 +394,7 @@ void CFileMenuListener::SaveFile(void)
 	CChars				szStart;
 	CChars				szName;
 	CChars				szDirectory;
-	char*				szFilename;
+	const char*			szFilename;
 
 	pEditor = GetSelectedEditor();
 	if (pEditor.IsNull())
