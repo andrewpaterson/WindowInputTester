@@ -12,8 +12,8 @@
 #
 # Add -DBASELIB_ASAN=ON for AddressSanitizer and LeakSanitizer.
 #
-# Source lists are read from the .vcxproj files so Visual Studio stays the source of truth.  WindowInputTester.cpp
-# (WinMain) is Windows only; WindowInputTesterLinux.cpp is its main here.
+# Source lists are read from the .vcxproj files so Visual Studio stays the source of truth.  Of the program's two
+# mains, WindowInputTester_Windows.cpp (WinMain) compiles to nothing here and WindowInputTester_Linux.cpp is the main.
 
 cmake_minimum_required(VERSION 3.16)
 project(WindowInputTester CXX)
@@ -98,8 +98,7 @@ vcxproj_sources(INPUTLIB_SOURCES "${INPUTLIB_DIR}/InputLib.vcxproj")
 vcxproj_sources(WINDOWLIB_SOURCES "${WINDOWLIB_DIR}/WindowLib.vcxproj")
 vcxproj_sources(X11LIB_SOURCES "${X11LIB_DIR}/X11Lib.vcxproj")
 vcxproj_sources(SCENEVIEWLIB_SOURCES "${SCENEVIEWLIB_DIR}/SceneViewLib.vcxproj")
-vcxproj_sources(TESTER_SOURCES "${TESTER_DIR}/WindowInputTester.vcxproj" EXCLUDE "WindowInputTester.cpp")
-list(APPEND TESTER_SOURCES "${TESTER_DIR}/WindowInputTesterLinux.cpp")
+vcxproj_sources(TESTER_SOURCES "${TESTER_DIR}/WindowInputTester.vcxproj")
 
 
 # Matches the Visual Studio configurations, except BREAK_ON_ERROR and

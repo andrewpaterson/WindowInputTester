@@ -236,7 +236,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="WindowInputTester.cpp" />
+    <ClCompile Include="WindowInputTester_Windows.cpp" />
+    <ClCompile Include="WindowInputTester_Linux.cpp" />
     <ClCompile Include="WindowInputTesterApp.cpp" />
     <ClCompile Include="WindowInputTesterTick.cpp" />
     <ClCompile Include="TabNameListener.cpp" />

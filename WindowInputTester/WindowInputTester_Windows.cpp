@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include <windows.h>
 #include "BaseLib/LeakDetector.h"
 #include "BaseLib/GlobalMemory.h"
@@ -42,3 +43,7 @@ int PASCAL WinMain(HINSTANCE hInstance,	HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	LeakDetection();
 	return bResult ? 0 : 1;
 }
+
+
+#endif // _WIN32
+

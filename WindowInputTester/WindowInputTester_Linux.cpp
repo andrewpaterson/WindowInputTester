@@ -1,3 +1,4 @@
+#ifdef LINUX_GNU
 #include "BaseLib/GlobalMemory.h"
 #include "StandardLib/Objects.h"
 #include "X11Lib/X11WindowFactory.h"
@@ -42,4 +43,7 @@ int main(int argc, char* argv[])
 	KillWindowInputTesterGlobals();
 	return bResult ? 0 : 1;
 }
+
+
+#endif // LINUX_GNU
 
