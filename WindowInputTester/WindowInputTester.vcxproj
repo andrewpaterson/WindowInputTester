@@ -114,6 +114,11 @@
       <AdditionalDependencies>dinput8.lib;dxguid.lib;xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='GCC-x64'">
+    <Link>
+      <AdditionalDependencies>X11;Xext;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="WindowInputTester_Windows.cpp" />
     <ClCompile Include="WindowInputTester_Linux.cpp" />
